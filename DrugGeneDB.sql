@@ -1,0 +1,46 @@
+CREATE TABLE "Disease" (
+	"diseaseID"	TEXT NOT NULL UNIQUE,
+	"diseaseName"	INTEGER NOT NULL UNIQUE,
+	PRIMARY KEY("diseaseID")
+);
+
+CREATE TABLE "Drug" (
+	"drugID"	TEXT NOT NULL UNIQUE,
+	"drugName"	TEXT NOT NULL UNIQUE,
+	"type"	TEXT,
+	"MOA"	TEXT,
+	PRIMARY KEY("drugID")
+);
+
+CREATE TABLE "Gene" (
+	"GeneCardsID"	TEXT NOT NULL UNIQUE,
+	"UniProtID"	TEXT NOT NULL UNIQUE,
+	"name"	TEXT NOT NULL UNIQUE,
+	PRIMARY KEY("GeneCardsID")
+);
+
+CREATE TABLE "GeneAssociation" (
+	"GeneCardsID"	TEXT NOT NULL,
+	"diseaseID"	TEXT NOT NULL,
+	CONSTRAINT "Interaction_FK1" FOREIGN KEY("GeneCardsID") REFERENCES "Gene"("GeneCardsID") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "Interaction_FK2" FOREIGN KEY("diseaseID") REFERENCES "Disease"("diseaseID") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "Interaction_PK" PRIMARY KEY("GeneCardsID","diseaseID")
+);
+
+CREATE TABLE "IndicatedFor" (
+	"diseaseID"	TEXT NOT NULL,
+	"drugID"	TEXT NOT NULL,
+	CONSTRAINT "IndicatedFor_FK2" FOREIGN KEY("drugID") REFERENCES "Drug"("drugID") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "IndicatedFor_FK1" FOREIGN KEY("diseaseID") REFERENCES "Disease"("diseaseID") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "IndicatedFor_PK" PRIMARY KEY("diseaseID","drugID")
+);
+
+CREATE TABLE "Interaction" (
+	"GeneCardsID"	TEXT NOT NULL,
+	"drugID"	TEXT NOT NULL,
+	"actionType"	TEXT,
+	"source"	TEXT,
+	CONSTRAINT "Interaction_FK1" FOREIGN KEY("GeneCardsID") REFERENCES "Gene"("GeneCardsID") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "Interaction_FK2" FOREIGN KEY("drugID") REFERENCES "Drug"("drugID") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "Interaction_PK" PRIMARY KEY("GeneCardsID","drugID")
+);
