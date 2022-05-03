@@ -20,17 +20,18 @@ def create_connection(db_file):
 
     return con
 
-#Write disease to databse
-def insertDiseaseInputsIntoDisease(db_file, EFO_file):
+
+#Write diseases to databse
+def insertDiseaseInputsIntoDisease(db_file, OTP_file):
     """Write diseaseId and diseaseName to Disease table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, EFO_file: tsv file from Open Target Platform
     :return: dabase with updated disease table"""
-      
+
     create_connection(db_file)
     EFO_List = []
-    with open(EFO_file, "r") as EFO_file:
-        tsv_file = csv.reader(EFO_file, delimiter="\t")
-        next(tsv_file, None) #skip the headers
+    with open(OTP_file, "r") as OTP_file:
+        tsv_file = csv.reader(OTP_file, delimiter="\t")
+        next(OTP_file, None) #skip the headers
         for row in tsv_file:
             EFO = row[0]
             name = row[1]
@@ -40,5 +41,25 @@ def insertDiseaseInputsIntoDisease(db_file, EFO_file):
                 con.commit()
     con.close()
 
+#Write drugs to database
+def insertDrugInputsIntoDrug(db_file, OTP_file):
+    """Write diseaseId, diseaseName, type and mechanism of action to Disease table from tsv file collected from the Open Target Platform
+    :param db_file: database db_file, EFO_file: tsv file from Open Target Platform
+    :return: dabase with updated disease table"""
 
-insertDiseaseInputsIntoDisease("/Users/kristinelippestad/Dokumenter/Master/testDB/TestDrugGeneDB.db", "/Users/kristinelippestad/downloads/EFO_0000311-known-drugs.tsv")
+    create_connection(db_file)
+    drugID_List = []
+    with open(OTP_file, "r") as OTP_file:
+        tsv_file = csv.reader(OTP_file, delimiter="\t")
+        next(tsv_file, None) #skip the headers
+        for row in tsv_file:
+            drugID = row[2]
+            drugName = row[3]
+            moleculeType = row[4]
+            MOA = row[5]
+
+            if drugID not in drugID_List:
+                drugID_List.append(drugID)
+                cursor.execute("INSERT INTO Drug VALUES (?, ?, ?, ?)", (drugID, drugName, moleculeType, MOA))
+                con.commit()
+    con.close()
