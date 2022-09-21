@@ -146,3 +146,5 @@ def insertIndicatedForInputsIntoDrug(db_file, OTP_file):
 
 #create_connection("/Users/kristinelippestad/Dokumenter/Master/testDB/TestDrugGeneDB.db")
 #con.close()
+
+print("hei")
