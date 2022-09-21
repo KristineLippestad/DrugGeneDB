@@ -1,5 +1,8 @@
+from aifc import Error
 import sqlite3
+import pandas as pd
 import csv
+
 
 #Connect to the database
 def create_connection(db_file):
@@ -16,78 +19,63 @@ def create_connection(db_file):
         print("Successfully connected to SQLite")
     except Error as e:
         print(e)
+        print("ERROR")
 
     return con
 
 #Write diseases to databse
-def insertDiseaseInputsIntoDisease(db_file, OTP_file):
+def insertDiseaseInputsIntoDisease(db_file, OTP_file, diseaseId, diseaseName):
     """Write diseaseId and diseaseName to Disease table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
     :return: database with updated disease table"""
 
     create_connection(db_file)
-    diseaseID_List = []
     with open(OTP_file, "r") as OTP_file:
-        tsv_file = csv.reader(OTP_file, delimiter="\t")
-        next(OTP_file, None) #skip the headers
-        for row in tsv_file:
-            diseaseID = row[0]
-            name = row[1]
-            #If statement could have been replaced with INSERT OR REPLACE to make the code more readable, but it gives a considerable longer run time.
-            if diseaseID not in diseaseID_List:
-                diseaseID_List.append(diseaseID)
-                cursor.execute("INSERT INTO Disease VALUES (?, ?)", (diseaseID, name))
-                con.commit()
+        df = pd.read_csv(OTP_file, delimiter="\t")
+        for ind in df.index:
+            diseaseID = df[diseaseId][ind]
+            name = df[diseaseName][ind]
+            cursor.execute("INSERT OR REPLACE INTO Disease VALUES (?, ?)", (diseaseID, name))
+            con.commit()
     con.close()
 
 #Write drugs to database
-def insertDrugInputsIntoDrug(db_file, OTP_file):
+def insertDrugInputsIntoDrug(db_file, OTP_file, drugId, drugName, type):
     """Write diseaseId, diseaseName, type and mechanism of action to Disease table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
     :return: database with updated disease table"""
 
     create_connection(db_file)
-    drugID_List = []
     with open(OTP_file, "r") as OTP_file:
-        tsv_file = csv.reader(OTP_file, delimiter="\t")
-        next(tsv_file, None) #skip the headers
-        for row in tsv_file:
-            drugID = row[2]
-            drugName = row[3]
-            moleculeType = row[4]
-            MOA = row[5]
-
-            if drugID not in drugID_List:
-                drugID_List.append(drugID)
-                cursor.execute("INSERT INTO Drug VALUES (?, ?, ?, ?)", (drugID, drugName, moleculeType, MOA))
-                con.commit()
+        df = pd.read_csv(OTP_file, delimiter="\t")
+        for ind in df.index:
+            drugID = df[drugId][ind]
+            name = df[drugName][ind]
+            moleculeType = df[type][ind]
+            cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, moleculeType))
+            con.commit()
     con.close()
 
 #Write genes to database
-def insertGeneInputsIntoDrug(db_file, OTP_file):
+def insertGeneInputsIntoGene(db_file, OTP_file, geneCardSymbol, geneName):
     """Write GeneCardsSymbol, and geneName to Gene table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
     :return: database with updated gene table"""
 
     create_connection(db_file)
-    geneCardsSymbol_List = []
     with open(OTP_file, "r") as OTP_file:
-        tsv_file = csv.reader(OTP_file, delimiter="\t")
-        next(tsv_file, None) #skip the headers
-        for row in tsv_file:
-            geneCardsSymbol = row[7]
+        df = pd.read_csv(OTP_file, delimiter="\t")
+        for ind in df.index:
+            symbol = df[geneCardSymbol][ind]
             uniprotID = None
-            geneName = row[8]
-
-            if geneCardsSymbol not in geneCardsSymbol_List:
-                geneCardsSymbol_List.append(geneCardsSymbol)
-                cursor.execute("INSERT INTO Gene VALUES (?, ?, ?)", (geneCardsSymbol, uniprotID, geneName))
-                con.commit()
+            name = df[geneName][ind]
+            cursor.execute("INSERT OR REPLACE INTO Gene VALUES (?, ?, ?)", (symbol, uniprotID, name))
+            con.commit()
     con.close()
 
 
 #Write gene associations to database
-def insertGeneAssociationInputsIntoGeneAssociation(db_file, OTP_file):
+def insertGeneAssociationInputsIntoGeneAssociation(db_file, OTP_file, geneCardSymbol, diseaseId):
     """Write geneCardsSymbol and diseaseID  to GeneAssociation table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
     :return: database with updated GeneAsssociation table"""
@@ -95,56 +83,58 @@ def insertGeneAssociationInputsIntoGeneAssociation(db_file, OTP_file):
     create_connection(db_file)
 
     with open(OTP_file, "r") as OTP_file:
-        tsv_file = csv.reader(OTP_file, delimiter="\t")
-        next(tsv_file, None) #skip the headers
-        for row in tsv_file:
-            geneCardsSymbol = row[7]
-            diseaseID = row[0]
-            cursor.execute("INSERT OR REPLACE INTO GeneAssociation VALUES (?, ?)", (geneCardsSymbol, diseaseID))
+        df = pd.read_csv(OTP_file, delimiter="\t")
+        for ind in df.index:
+            symbol = df[geneCardSymbol][ind]
+            diseaseID = df[diseaseId][ind]
+            cursor.execute("INSERT OR REPLACE INTO GeneAssociation VALUES (?, ?)", (symbol, diseaseID))
             con.commit()
     con.close()
 
 #Write interactions to database
-def insertInteractionInputsIntoInteraction(db_file, OTP_file):
+def insertInteractionInputsIntoInteraction(db_file, OTP_file, geneCardSymbol, drugId, mechanismOfAction, actionType, phase):
     """Write GeneCardsSymbol, drugID, actionType and source to Interaction table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
     :return: database with updated Interaction table"""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
-        tsv_file = csv.reader(OTP_file, delimiter="\t")
-        next(tsv_file, None) #skip the headers
-        for row in tsv_file:
-            geneCardsSymbol = row[7]
-            drugID = row[2]
-            actionType = row[6]
+        df = pd.read_csv(OTP_file, delimiter="\t")
+        for ind in df.index:
+            symbol = df[geneCardSymbol][ind]
+            drugID = df[drugId][ind]
+            MOA = df[mechanismOfAction][ind]
+            actType = df[actionType][ind]
+            Phase = df[phase][ind]
             source = "https://platform.opentargets.org/disease/EFO_0000311"
 
-            cursor.execute("INSERT OR REPLACE INTO Interaction VALUES (?, ?, ?, ?)", (geneCardsSymbol, drugID, actionType, source))
+            cursor.execute("INSERT OR REPLACE INTO Interaction VALUES (?, ?, ?, ?, ?, ?)", (symbol, drugID, MOA, actType, Phase, source))
             con.commit()
     con.close()
 
 #Write indicated for to database
-def insertIndicatedForInputsIntoDrug(db_file, OTP_file):
+def insertIndicatedForInputsIntoIndicatedFor(db_file, OTP_file, diseaseId, drugId):
     """Write diseaseID, drugID, and phase to IndicatedFor table from tsv file collected from the Open Target Platform
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
     :return: database with updated IndicatedFor table"""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
-        tsv_file = csv.reader(OTP_file, delimiter="\t")
-        next(tsv_file, None) #skip the headers
-        for row in tsv_file:
-            diseaseID = row[0]
-            drugID = row[2]
-            phase = row[9]
+        df = pd.read_csv(OTP_file, delimiter="\t")
+        for ind in df.index:
+            diseaseID = df[diseaseId][ind]
+            drugID = df[drugId][ind]
 
-            cursor.execute("INSERT OR REPLACE INTO IndicatedFor VALUES (?, ?, ?)", (diseaseID, drugID, phase))
+            cursor.execute("INSERT OR REPLACE INTO IndicatedFor VALUES (?, ?)", (diseaseID, drugID))
             con.commit()
     con.close()
 
 
-#create_connection("/Users/kristinelippestad/Dokumenter/Master/testDB/TestDrugGeneDB.db")
+create_connection("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db")
+#insertDiseaseInputsIntoDisease("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'diseaseName')
+#insertDrugInputsIntoDrug("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'drugId', 'drugName', 'type')
+#insertGeneInputsIntoGene("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'name')
+#insertGeneAssociationInputsIntoGeneAssociation("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'diseaseId')
+#insertInteractionInputsIntoInteraction("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'drugId', 'mechanismOfAction', 'actionType', 'phase')
+#insertIndicatedForInputsIntoIndicatedFor("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'drugId')
 #con.close()
-
-print("hei")
