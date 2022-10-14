@@ -150,3 +150,5 @@ create_connection("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db")
 #insertInteractionInputsIntoInteraction("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'drugId', 'mechanismOfAction', 'actionType')
 #insertIndicatedForInputsIntoIndicatedFor("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'drugId', 'phase')
 #con.close()
+
+
