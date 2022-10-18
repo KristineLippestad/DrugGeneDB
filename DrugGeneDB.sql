@@ -12,10 +12,10 @@ CREATE TABLE "Drug" (
 );
 
 CREATE TABLE "Gene" (
-	"GeneCardsSymbol"	TEXT NOT NULL UNIQUE,
+	"HGNC"	TEXT NOT NULL UNIQUE,
 	"UniProtID"	TEXT UNIQUE,
 	"name"	TEXT NOT NULL,
-	PRIMARY KEY("GeneCardsSymbol")
+	PRIMARY KEY("HGNC")
 );
 
 CREATE TABLE "CellLine" (
@@ -29,11 +29,11 @@ CREATE TABLE "CellLine" (
 );
 
 CREATE TABLE "GeneAssociation" (
-	"GeneCardsSymbol"	TEXT NOT NULL,
+	"HGNC"	TEXT NOT NULL,
 	"diseaseID"	TEXT NOT NULL,
-	CONSTRAINT "Interaction_FK1" FOREIGN KEY("GeneCardsSymbol") REFERENCES "Gene"("GeneCardsSymbol") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "Interaction_FK1" FOREIGN KEY("HGNC") REFERENCES "Gene"("HGNC") ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT "Interaction_FK2" FOREIGN KEY("diseaseID") REFERENCES "Disease"("diseaseID") ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT "Interaction_PK" PRIMARY KEY("GeneCardsSymbol","diseaseID")
+	CONSTRAINT "Interaction_PK" PRIMARY KEY("HGNC","diseaseID")
 );
 
 CREATE TABLE "IndicatedFor" (
@@ -45,15 +45,15 @@ CREATE TABLE "IndicatedFor" (
 );
 
 CREATE TABLE "Interaction" (
-	"GeneCardsSymbol"	TEXT NOT NULL,
+	"HGNC"	TEXT NOT NULL,
 	"drugID"	TEXT NOT NULL,
 	"MOA"	TEXT,
 	"actionType"	TEXT,
 	"phase"	INTEGER,
 	"source"	TEXT,
-	CONSTRAINT "Interaction_PK" PRIMARY KEY("GeneCardsSymbol","drugID"),
+	CONSTRAINT "Interaction_PK" PRIMARY KEY("HGNC","drugID"),
 	CONSTRAINT "Interaction_FK2" FOREIGN KEY("drugID") REFERENCES "Drug"("drugID") ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT "Interaction_FK1" FOREIGN KEY("GeneCardsSymbol") REFERENCES "Gene"("GeneCardsSymbol") ON UPDATE CASCADE ON DELETE CASCADE
+	CONSTRAINT "Interaction_FK1" FOREIGN KEY("HGNC") REFERENCES "Gene"("HGNC") ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE "Sensitivity" (
