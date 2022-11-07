@@ -57,9 +57,9 @@ def insertDrugInputsIntoDrug(db_file, OTP_file, drugId, drugName, type):
     con.close()
 
 #Write genes to database
-def insertGeneInputsIntoGene(db_file, OTP_file, geneCardSymbol, geneName, gene_file, geneCardsSymbol, entry):
+def insertGeneInputsIntoGene(db_file, OTP_file, HGNC, geneName, gene_file, geneCardsSymbol, entry):
     """Write GeneCardsSymbol, UniProtID and name to Gene table from tsv file collected from the Open Target Platform.
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, geneCardsSymbol: column name for GeneCard symbol in OTP_file, geneName: column name for gene name in OTP_file,
+    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, HGNC: column name for symbol in OTP_file, geneName: column name for gene name in OTP_file,
            gene_file: tsv file collected from UniProt ID mapping, geneCardsSymbol: column name for geneCard symbols in gene_file, entry: column name for entry in gene_file. 
     :return: database with updated gene table"""
 
@@ -68,7 +68,7 @@ def insertGeneInputsIntoGene(db_file, OTP_file, geneCardSymbol, geneName, gene_f
         df = pd.read_csv(OTP_file, delimiter="\t")
         uniProtDict = uniProt_dict(gene_file, geneCardsSymbol, entry)
         for ind in df.index:
-            symbol = df[geneCardSymbol][ind]
+            symbol = df[HGNC][ind]
             uniprotID = uniProtDict.get(symbol, None)
             name = df[geneName][ind]
             cursor.execute("INSERT OR REPLACE INTO Gene VALUES (?, ?, ?)", (symbol, uniprotID, name))
@@ -146,14 +146,12 @@ def insertIndicatedForInputsIntoIndicatedFor(db_file, OTP_file, diseaseId, drugI
             con.commit()
     con.close()
 
+insertDiseaseInputsIntoDisease("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'diseaseName')
+insertDrugInputsIntoDrug("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'drugId', 'drugName', 'type')
+insertGeneInputsIntoGene("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'name', "/Users/kristinelippestad/Dokumenter/Master/uniProtID.tsv", "From", "Entry")
+insertGeneAssociationInputsIntoGeneAssociation("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'diseaseId')
+insertInteractionInputsIntoInteraction("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'drugId', 'mechanismOfAction', 'actionType')
+insertIndicatedForInputsIntoIndicatedFor("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'drugId', 'phase')
 
-create_connection("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db")
-#insertDiseaseInputsIntoDisease("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'diseaseName')
-#insertDrugInputsIntoDrug("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'drugId', 'drugName', 'type')
-#insertGeneInputsIntoGene("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'name', "/Users/kristinelippestad/Dokumenter/Master/uniProtID.tsv", "From", "Entry")
-#insertGeneAssociationInputsIntoGeneAssociation("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'diseaseId')
-#insertInteractionInputsIntoInteraction("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'symbol', 'drugId', 'mechanismOfAction', 'actionType')
-#insertIndicatedForInputsIntoIndicatedFor("/Users/kristinelippestad/Dokumenter/Master/Test_DB.db", "/Users/kristinelippestad/Downloads/EFO_0000311-known-drugs.tsv", 'diseaseId', 'drugId', 'phase')
-#con.close()
 
 
