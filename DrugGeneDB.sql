@@ -20,9 +20,12 @@ CREATE TABLE "Gene" (
 
 CREATE TABLE "BindingAffinity" (
 	"BindingReactionID"	TEXT NOT NULL UNIQUE,
-	"Kd"	TEXT,
-	"Ki"	TEXT,
-	"IC50"	TEXT,
+	"Kd_min"	NUMERIC,
+	"Kd_max"	NUMERIC,
+	"Ki_min"	NUMERIC,
+	"Ki_max"	NUMERIC,
+	"IC50_min"	NUMERIC,
+	"IC50_max"	NUMERIC,
 	"pH"	NUMERIC,
 	"Temperature"	NUMERIC,
 	"Organism"	TEXT,
@@ -71,8 +74,8 @@ CREATE TABLE "Interaction" (
 CREATE TABLE "Sensitivity" (
 	"CLO"	TEXT NOT NULL,
 	"DrugID"	TEXT NOT NULL,
-	"IC50"	TEXT,
-	"AUC"	TEXT,
+	"IC50"	NUMERIC,
+	"AUC"	NUMERIC,
 	"Source"	TEXT,
 	CONSTRAINT "Sensitivity_PK" PRIMARY KEY("CLO","DrugID"),
 	CONSTRAINT "Sensitivity_FK1" FOREIGN KEY("CLO") REFERENCES "CellLine"("CLO") ON UPDATE CASCADE ON DELETE CASCADE,

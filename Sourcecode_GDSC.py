@@ -278,6 +278,6 @@ def insertSensitivity(db_file, gdsc_dataset, clo_file, drug_file, cloId, cloName
             con.commit()
     con.close()
 
-insertDrugs("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/gdsc_druglist.tsv", " Name")
-insertCellLines("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/gdsc_cellLines.tsv", "/Users/kristinelippestad/Downloads/CLO.csv", "Cell line Name", " Tissue", "Tissue sub-type", "Class ID", "Synonyms", " TCGA Classfication")
-insertSensitivity("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/GDSC2_fitted_dose_response.csv", "/Users/kristinelippestad/Downloads/CLO.csv", "/Users/kristinelippestad/Downloads/chembl_drug.tsv", "Class ID", "Synonyms", "Parent Molecule", "Synonyms", "CELL_LINE_NAME", "DRUG_NAME", "LN_IC50", "AUC", "DATASET")
+#insertDrugs("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/gdsc_druglist.tsv", " Name")
+#insertCellLines("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/gdsc_cellLines.tsv", "/Users/kristinelippestad/Downloads/CLO.csv", "Cell line Name", " Tissue", "Tissue sub-type", "Class ID", "Synonyms", " TCGA Classfication")
+#insertSensitivity("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/GDSC2_fitted_dose_response.csv", "/Users/kristinelippestad/Downloads/CLO.csv", "/Users/kristinelippestad/Downloads/chembl_drug.tsv", "Class ID", "Synonyms", "Parent Molecule", "Synonyms", "CELL_LINE_NAME", "DRUG_NAME", "LN_IC50", "AUC", "DATASET")
