@@ -48,10 +48,12 @@ def drugPanelTT(fileName, df):
         print(df)
         for ind in df.index:
             drugId = df["drugID"][ind]
-            actiontype = df["actionType"][ind]
+            aType = df["actionType"][ind]
+            if aType == "Inhibitor":
+                    aT = "inhibits"
             targetList.append(df["HGNC"][ind])
         
-        f.write(drugId + "\t" + actiontype + "\t" + "\t".join(set(targetList)) + "\n")
+        f.write(drugId + "\t" + aT + "\t" + "\t".join(set(targetList)) + "\n")
     f.close()    
 
 def drug(db_file, file_name, drugName):
