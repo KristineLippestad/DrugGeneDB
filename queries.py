@@ -21,34 +21,44 @@ def create_connection(db_file):
     return con
 
 
-def smallMoleculeAndTargets(db_file, HGNC, type):
+def TargetsAndType(db_file, file_name, HGNC, type):
 #Drugs that are small molecules and target a gene of interest.
     
     create_connection(db_file)
-    #Kan dette gjøres om til en spørring?
     drugList = []
+    frames = []
     for row in cursor.execute("SELECT Drug.drugID FROM Drug NATURAL INNER JOIN Interaction WHERE HGNC = ? and type = ?", (HGNC, type)):
         s = str(row)
         drugList.append(s.strip("'(,)"))
+
     for i in drugList:
-        for r in cursor.execute("SELECT drugName, Drug.drugID, actionType, HGNC FROM Drug NATURAL INNER JOIN Interaction WHERE Drug.drugID = ?", (i, )):
-            print(r)
+        cursor.execute("SELECT drugName, Drug.drugID, actionType, HGNC FROM Drug NATURAL INNER JOIN Interaction WHERE Drug.drugID = ?", (i, ))
+        df = pd.DataFrame(cursor.fetchall(), columns=["drugName", "drugID", "actionType", "HGNC"])
+        drugPanelTT(file_name, df)
     con.close()
 
-def twoTargets(db_file, targetOne, targetTwo):
-#Drugs that target two genes of interest.
-    
-    create_connection(db_file)
-    for row in cursor.execute("SELECT drugName, Drug.drugID, actionType, HGNC FROM Drug NATURAL INNER JOIN Interaction WHERE HGNC IN (SELECT drugID FROM Interaction WHERE GeneCardsSymbol IN (?,?))", (targetOne, targetTwo)):
-        print(row)
-    con.close()
-
+def drugPanelTT(fileName, df):
+    with open(fileName, 'a+') as f:
+        f.seek(0)
+        first_line = f.readline().rstrip('\n')
+        if first_line != "#Name\tTarget":
+            f.write("#Name\tTarget" + "\n") # Retrieve all targets for a given compound.
+        targetList = []
+        print("Target list: ", targetList)
+        print(df)
+        for ind in df.index:
+            drugId = df["drugID"][ind]
+            actiontype = df["actionType"][ind]
+            targetList.append(df["HGNC"][ind])
+        
+        f.write(drugId + "\t" + actiontype + "\t" + "\t".join(set(targetList)) + "\n")
+    f.close()    
 
 def drug(db_file, file_name, drugName):
-#Drugs that are small molecules and target a gene of interest.
+#Drug of interest
     
     create_connection(db_file)
-    cursor.execute("SELECT * FROM Drug WHERE drugName = ? and type = 'Small molecule'", (drugName, ))
+    cursor.execute("SELECT * FROM Drug WHERE drugName = ? ", (drugName, ))
     df = pd.DataFrame(cursor.fetchall(), columns=["drugID", "drugName", "type"])
     drugPanel(file_name, df)
     con.close()
@@ -61,7 +71,6 @@ def drugPanel(fileName, df):
             targetList = []
             cursor.execute("SELECT drugID, actionType, HGNC FROM Interaction WHERE drugID = ?", (drugId, ))
             df2 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "actionType", "HGNC"])
-            print(df2)
             for i in df2.index:
                 aType = df2["actionType"][i]
                 if aType == "Inhibitor":
@@ -72,6 +81,10 @@ def drugPanel(fileName, df):
     f.close()
 
 def targetProfile(db_file, file_name, id_list, kd_limit = None, ki_limit = None, ic50_limit = None):
+    """Retrieve target profiles for a list of drugs with measured binding affinities below set limits and write them to a drug panel file. 
+    :param db_file: database db_file, file_name: name for drugpanel file, id_list: list of drug IDs, kd_limit: Upper limit for kd value for binding affinity, ki_limit: Upper limit for ki value for binding affinity, ic50_limit: Upper limit for ic50 value for binding affinity. 
+    """
+
     create_connection(db_file)
     for i in id_list:
         frames = []
@@ -108,14 +121,13 @@ def drugPanelTP(fileName, df):
                 aType = df["actionType"][ind]
                 if aType == "Inhibitor":
                     aT = "inhibits"
-                df["HGNC"][ind]
                 targetList.append(df["HGNC"][ind])
             f.write(drugId + "\t" + aT + "\t" + "\t".join(set(targetList)) + "\n")
         except:
             print("No interactions with binding affinity measured below the given limit value.")
     f.close()
 
-#smallMoleculeAndTargets('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db', 'FLT4', 'Small molecule')
-#twoTargets('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db', 'FLT4', 'CSF1R')
-#drug('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db','drugTests.txt','SUNITINIB')
-targetProfile('/Users/kristinelippestad/Dokumenter/Master/DTP.db', '/Users/kristinelippestad/Dokumenter/Master/drugDrug.txt', ['CHEMBL98', 'CHEMBL1289494', 'CHEMBL1614710', 'CHEMBL1173655'], ki_limit = 20, ic50_limit = 30)
+#TargetsAndType('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db', 'TargetTypePanel.txt', 'FLT4', 'Small molecule')
+#twoTargets('/Users/kristinelippestad/Dokumenter/Master/DTP.db', 'FLT4', 'CSF1R')
+#drug('/Users/kristinelippestad/Dokumenter/Master/DTP.db','drugTests.txt','SUNITINIB')
+#targetProfile('/Users/kristinelippestad/Dokumenter/Master/DTP.db', '/Users/kristinelippestad/Dokumenter/Master/drugDrug.txt', ['CHEMBL98', 'CHEMBL1289494', 'CHEMBL1614710', 'CHEMBL1173655'], ki_limit = 20, ic50_limit = 30)
