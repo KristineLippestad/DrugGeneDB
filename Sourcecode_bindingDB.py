@@ -112,4 +112,4 @@ def insertBindingAffinity(db_file, binding_dataset, drugId, upId, Kd, Ki, IC50, 
         con.commit()
     con.close()
 
-insertBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DTP.db", "/Users/kristinelippestad/Downloads/BindingDB_All.tsv", "ChEMBL ID of Ligand", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
+insertBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/BindingDB_All.tsv", "ChEMBL ID of Ligand", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")

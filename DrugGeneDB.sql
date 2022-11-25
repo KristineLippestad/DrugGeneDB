@@ -14,7 +14,8 @@ CREATE TABLE "Drug" (
 CREATE TABLE "Gene" (
 	"HGNC"	TEXT NOT NULL UNIQUE,
 	"UniProtID"	TEXT UNIQUE,
-	"Name"	TEXT NOT NULL,
+	"Name"	TEXT,
+	"Organism"	TEXT,
 	PRIMARY KEY("HGNC")
 );
 
