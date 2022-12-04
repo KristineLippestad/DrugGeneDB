@@ -53,7 +53,7 @@ def drugPanelTT(fileName, df):
                     aT = "inhibits"
             targetList.append(df["HGNC"][ind])
         
-        f.write(drugId + "\t" + aT + "\t" + "\t".join(set(targetList)) + "\n")
+        f.write(drugId + "\t" + aT + "\t" + "\t".join(sorted(set(targetList))) + "\n")
     f.close()    
 
 def drug(db_file, file_name, drugName):
@@ -178,7 +178,8 @@ def drugPanelBA(fileName, df):
     f.close()
 
 
-#TargetsAndType('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db', 'TargetTypePanel.txt', 'FLT4', 'Small molecule')
+#TargetsAndType('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db', 'KDRPanel.txt', 'KDR', 'Small molecule')
 #twoTargets('/Users/kristinelippestad/Dokumenter/Master/DTP.db', 'FLT4', 'CSF1R')
 #drug('/Users/kristinelippestad/Dokumenter/Master/DTP.db','drugTests.txt','SUNITINIB')
-#targetProfileBA('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db', '/Users/kristinelippestad/Dokumenter/Master/ThreeDrugs10nM.txt', ['CHEMBL1077979', 'CHEMBL573339', 'CHEMBL507361'], kd_limit = 10, ki_limit = 10, ic50_limit = 10)
+targetProfileBA('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db', '/Users/kristinelippestad/Dokumenter/Master/AGSstudy10nM.txt', ['CHEMBL573339','CHEMBL1077979', 'CHEMBL507361'], kd_limit = 10, ki_limit = 10, ic50_limit = 10)
+

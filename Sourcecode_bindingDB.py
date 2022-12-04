@@ -112,4 +112,53 @@ def insertBindingAffinity(db_file, binding_dataset, drugId, upId, Kd, Ki, IC50, 
         con.commit()
     con.close()
 
-insertBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/BindingDB_All.tsv", "ChEMBL ID of Ligand", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
+def insertSingleBindingAffinity(db_file, drugID, hgnc, Source, Kd_min = None, Kd_max = None, Ki_min = None, Ki_max = None, ic50_min = None, ic50_max = None, pH = None, temp = None, Organism = None):
+    create_connection(db_file)
+    cursor.execute("SELECT * FROM Drug WHERE DrugID = ?", (drugID, ))
+    row1 = cursor.fetchone()
+    cursor.execute("SELECT * FROM Gene WHERE HGNC = ?", (hgnc, ))        
+    row2 = cursor.fetchone()
+    bindingReaction = hgnc + "_" + drugID + "_" 
+    a = 1
+    if (row1 != None and row2 != None):
+        cursor.execute("SELECT BindingReactionID FROM MeasuredFor WHERE BindingReactionID LIKE ?", (bindingReaction + '%', ))
+        df = pd.DataFrame(cursor.fetchall(), columns=["binReaID"])
+
+        if df.empty:
+            bindingReactionID = bindingReaction + "1" 
+        
+        else:
+            for ind in df.index:
+                s = (str(df["binReaID"][ind])).split("_")
+                nr = int(s[-1])
+                if nr > a:
+                    a = nr
+                bindingReactionID = bindingReaction + str(a + 1)
+
+        cursor.execute("INSERT OR REPLACE INTO MeasuredFor VALUES (?, ?, ?)", (hgnc, drugID, bindingReactionID))
+        cursor.execute("INSERT OR REPLACE INTO BindingAffinity VALUES (?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?)", (bindingReactionID, Kd_min, Kd_max, Ki_min, Ki_max, ic50_min, ic50_max, pH, temp, Organism, Source))
+    
+    else:
+        print("Drug or target dosen't exist in the database")
+
+    con.commit()
+    con.close()
+
+#insertBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/BindingDB_All.tsv", "ChEMBL ID of Ligand", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
+
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "BRAF", "doi:10.1038/nbt1358", Kd_min = 2900, Kd_max = 2900,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "CLK1", "doi:10.1038/nbt1358", Kd_min = 3900, Kd_max = 3900,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "DAPK1", "doi:10.1038/nbt1358", Kd_min = 2400, Kd_max = 2400,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "DAPK2", "doi:10.1038/nbt1358", Kd_min = 2700, Kd_max = 2700,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "DAPK3", "doi:10.1038/nbt1358", Kd_min = 840, Kd_max = 840,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "LIMK2", "doi:10.1038/nbt1358", Kd_min = 3500, Kd_max = 3500,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "CDC42BPA", "doi:10.1038/nbt1358", Kd_min = 1800, Kd_max = 1800,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "MYLK", "doi:10.1038/nbt1358", Kd_min = 1500, Kd_max = 1500,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "PIK3CA", "doi:10.1038/nbt1358", Kd_min = 1.5, Kd_max = 1.5,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "RAF1", "doi:10.1038/nbt1358", Kd_min = 3700, Kd_max = 3700,  temp = 25, Organism = "Homo sapiens")
+
+ 
+
+
+
+
