@@ -43,4 +43,6 @@ def insertGeneInputsIntoGene(db_file, uniProt_file, entry, HGNC, proteinName, or
             con.commit()
     con.close()
 
-insertGeneInputsIntoGene("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/GeneFile.tsv", "Entry", "Gene Names (primary)", "Protein names", "Organism")
+#insertGeneInputsIntoGene("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/GeneFile.tsv", "Entry", "Gene Names (primary)", "Protein names", "Organism")
+
+
