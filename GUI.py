@@ -1,11 +1,13 @@
 from dash import Dash, html, dcc, Input, Output, exceptions, no_update
 import plotly.express as px
+import dash_cytoscape as cyto
 
 import pandas as pd
 import sqlite3
 from aifc import Error
 
 # https://towardsdatascience.com/dashing-through-christmas-songs-using-dash-and-sql-34ef2eb4d0cb
+# https://plotly.com/python/
 
 #Connect to the database
 def create_connection(db_file):
@@ -31,7 +33,7 @@ create_connection('DrugTargetInteractionDB.db')
 app = Dash(__name__)
 
 colors = {
-    'background': '#ECF9FF',
+    'background': '#E5F4FA',
     'text': '#000000'
 }
 
@@ -57,7 +59,7 @@ app.layout = html.Div([
                      multi=True, # If true, the user can select multiple values
                      #value = [],
                      id='drugID-dropdown'), #list er ikke riktig
-     ], style={'margin-bottom': -150, 'padding': 100, 'width':1330, 'backgroundColor': colors['background']}),
+     ], style={'margin-bottom': -80, 'margin-top': 70, 'margin-left': 80, 'padding': 10, 'width':1330, 'borderRadius': '10px', 'backgroundColor': colors['background']}),
 
     html.Div([
         html.H3('Binding Affinity Thresholds'),
@@ -103,8 +105,10 @@ app.layout = html.Div([
             updatemode='drag'
         ),
 
-        html.Div(id='ic50-output-container', style={'margin-top': 20}),
+        html.Div(id='ic50-output-container', style={'margin-top': 20})],  
+        style={'margin-bottom': -80, 'margin-top': 120, 'margin-left': 80, 'padding': 10, 'width':600, 'borderRadius': '10px', 'backgroundColor': colors['background']}),
 
+    html.Div([
         html.H3('Experimental conditions'),
 
         'Temperature: ',
@@ -114,102 +118,192 @@ app.layout = html.Div([
         html.Br(),
         "pH: ",
         dcc.Input(id='ph-input', value='initial value', type='text')
-        ], style={'margin-top': '0','padding': 100, 'height':15, 'width':600, 'color': colors['text']}), # H Head line (number indicates size (1-6))),
-
+        ], style={'margin-top': 120, 'margin-left': 80, 'padding': 10, 'width':250, 'borderRadius': '10px', 'backgroundColor': colors['background']}), # H Head line (number indicates size (1-6))),
 
     html.Div([
-        html.Button("Download drug panel", id="btn_drugpanel"), 
-        dcc.Download(id="download-text-index")
-        ], style={'padding-left': '70%', 'margin-top': -92}),
 
-    html.Br(),
-    html.Div(id='drugPanel-output', style = {'padding-left': '50%', 'padding-right':'23%','margin-top': -10, 'text-align': 'right'})
+        html.Div([
+            html.Button("Download drug panel", id="btn_drugpanel"), 
+            dcc.Download(id="download-text-index")
+            ], style={'padding-left': '40%', 'margin-top': -92}),
+        html.Div([
+        html.Br(),
+        html.Div(id='drugPanel-output', style = {'margin-left': -50, 'width':600})])
 
+    ],style={'margin-top': -530, 'margin-left': 750,'width':480, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), #'margin-top': -800, 'padding': 100, 'padding-left': '21.5%', 'width':250, 
 
+    html.Div([
+    
+    html.Div([dcc.RadioItems(id = 'selectedDrugs-output')
+    ]),
+
+    html.Div([
+    cyto.Cytoscape(
+        id='cytoscape-drugTargetNet',
+        layout={'name': 'preset'},
+        style={'width': '100%', 'height': '400px'}, 
+        
+    )])
+], style={'margin-top': 40, 'margin-left': 750, 'padding': 10, 'width':660, 'borderRadius': '10px', 'backgroundColor': colors['background']}),
 ])
 
 #Every callback needs at least one oínput and one output
 #Every single pair of output can only have one callback
 @app.callback(
-    [#Output(component_id='drugID-dropdown', component_property='children'),
-    Output(component_id='kd-output-container', component_property='children'),
+    [Output(component_id='kd-output-container', component_property='children'),
     Output(component_id='ki-output-container', component_property='children'),
     Output(component_id='ic50-output-container', component_property='children'),
-    Output(component_id='drugPanel-output', component_property='children')], #Multiple outputs muse be placed inside a list, Output is the children property of the component with the ID 'graph-with-slicer'
+    Output(component_id='selectedDrugs-output', component_property='options'),
+    Output(component_id='drugPanel-output', component_property='children'),
+    Output(component_id='cytoscape-drugTargetNet', component_property='elements')
+    ], #Multiple outputs muse be placed inside a list, Output is the children property of the component with the ID 'graph-with-slicer'
     [Input(component_id='drugID-dropdown', component_property='value'), 
     Input(component_id='kd--slider', component_property='value'), #multiple inputs must also be inside a list
     Input(component_id='ki--slider', component_property='value'),
-    Input(component_id='ic50--slider', component_property='value')] #need to return as many figures as you have inputs
+    Input(component_id='ic50--slider', component_property='value'),
+    Input(component_id='selectedDrugs-output', component_property='value')] #need to return as many figures as you have inputs
      #State can be used if a button should be clicked to update a figure (might be used for pH, temp and to download drugpanel)
     #, prevent_initial-call=True #Doesn't trigger all call back when the page is refreshed.
     )
 
-def update_figure(drugID_list, kd_value, ki_value, ic50_value): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
-    
+def update_figure(drugID_list, kd_value, ki_value, ic50_value, selectedDrug): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
     kd = transform_value(kd_value)
     ki = transform_value(ki_value)
     ic50 = transform_value(ic50_value)
     print(kd, ki, ic50)
     
     if len(drugID_list) == 0:
-        return 'Threshold selected for Kd: "{}"'.format(kd), 'Threshold selected for Ki: "{}"'.format(ki), u'Threshold selected for IC\u2085\u2080: "{}"'.format(ic50), no_update,
+        return 'Threshold selected for Kd: "{}"'.format(kd), 'Threshold selected for Ki: "{}"'.format(ki), u'Threshold selected for IC\u2085\u2080: "{}"'.format(ic50), no_update, no_update, no_update, no_update
     
-    else: 
-        print(f'value user chose: {drugID_list}')
+    elif len(drugID_list) > 0 and selectedDrug == None:
         #remember to make a copy of the df if you change it
         dp = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50)
+        netOptions = radioItemsOptions(drugID_list)
+        return 'Threshold selected for Kd: "{}"'.format(kd), 'Threshold selected for Ki: "{}"'.format(ki), u'Threshold selected for IC\u2085\u2080: "{}"'.format(ic50), netOptions, dp, no_update
+    else: 
+        print(f'ID user chose: {selectedDrug}')
+        #remember to make a copy of the df if you change it
+        dp = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50)
+        netOptions = radioItemsOptions(drugID_list)
+        print(f'Selected drug {selectedDrug}')
+        netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50)
+        return 'Threshold selected for Kd: "{}"'.format(kd), 'Threshold selected for Ki: "{}"'.format(ki), u'Threshold selected for IC\u2085\u2080: "{}"'.format(ic50), netOptions, dp, netElements
 
-        return 'Threshold selected for Kd: "{}"'.format(kd), 'Threshold selected for Ki: "{}"'.format(ki), u'Threshold selected for IC\u2085\u2080: "{}"'.format(ic50), dp
+def radioItemsOptions(drugID_list):
+    options = [{'label': x, 'value': x} for x in drugID_list]
+    return options
+
+def drugTargetNet(selectedDrug, kd_limit = None, ki_limit = None, ic50_limit = None):
+    
+    print(f'kd {kd_limit}, ki {ki_limit}, ic50 {ic50_limit}')
+    # Network for selected drug where node size depends on binding affinity
+    targets = targetList(selectedDrug, kd_limit, ki_limit, ic50_limit)
+    #elements = [{'data': {'id': 'drug', 'label': selectedDrug}, 'position': {'x': 50, 'y': 50}, 'size':50}]
+    elements = [{'data': {'id': 'drug', 'label': selectedDrug}, 'position': {'x': 50, 'y': 50}}]
+    a = 200
+    for i in targets:
+        #elements.append({'data': {'id': i, 'label': i}, 'position': {'x': 200, 'y': 200}, 'size':70}) 
+        #elements.append({'data': {'source': 'drug', 'target': i,'label': f'Node {selectedDrug} to {i}'}})
+        
+        print(f'type {type(i)}')
+        print(i)
+
+        targetData = {}
+        targetData['id'] = str(i)
+        targetData['label'] = str(i)
+
+        print(targetData)
+
+        targetPosition = {}
+        targetPosition['x'] = a
+        targetPosition['y'] = 200
+        a += 40
+
+        print(targetPosition)
+
+        targetDict = {}
+        targetDict['data'] = targetData
+        targetDict['position'] = targetPosition
+
+        print(targetDict)
+
+        elements.append(targetDict) 
+
+        edgeData = {}
+        edgeData['source'] = 'drug'
+        edgeData['target'] = str(i)
+        edgeData['label'] = f'Node {selectedDrug} to {str(i)}'
+
+        edgeDict = {}
+        edgeDict['data'] = edgeData
+
+        elements.append(edgeDict)
+    
+    print(elements)
+    
+    '''
+    elements=[
+        {'data': {'id': 'one', 'label': 'Node 1'}, 'position': {'x': 75, 'y': 75}},
+        {'data': {'id': 'two', 'label': 'Node 2'}, 'position': {'x': 200, 'y': 200}},
+        {'data': {'source': 'one', 'target': 'two'}}
+    ]       
+    '''
+    return elements
+
 
 def targetProfileBA(id_list, kd_limit = None, ki_limit = None, ic50_limit = None):
     """Retrieve target profiles for a list of drugs with measured binding affinities below set limits and write them to a drug panel file. 
     :param db_file: database db_file, file_name: name for drugpanel file, id_list: list of drug IDs, kd_limit: Upper limit for kd value for binding affinity, ki_limit: Upper limit for ki value for binding affinity, ic50_limit: Upper limit for ic50 value for binding affinity. 
     """
-    create_connection('DrugTargetInteractionDB.db')
 
     complete_dp = ""
     for i in id_list:
-        frames = []
-        if kd_limit != None:
-            cursor.execute("SELECT DISTINCT drugID, HGNC FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and  Kd_max <= ?", (i, kd_limit))
-            df1 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "HGNC"])
-            frames.append(df1)
-
-        if ki_limit != None: 
-            cursor.execute("SELECT DISTINCT drugID, HGNC FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and  Ki_max <= ?", (i, ki_limit))
-            df2 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "HGNC"])
-            frames.append(df2)
-
-        if ic50_limit: 
-            cursor.execute("SELECT DISTINCT drugID, HGNC FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and  IC50_max <= ?", (i, ic50_limit))
-            df3 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "HGNC"])
-            frames.append(df3)
-            
-        dp_df = pd.concat(frames, ignore_index=True)
-
-        targetList = []
-        for ind in dp_df.index:
-            drugId = dp_df["drugID"][ind]
-            aT = "Inhibits"
-            targetList.append(dp_df["HGNC"][ind])
+        
+        targets = targetList(i, kd_limit, ki_limit, ic50_limit)
     
-        if len(targetList) > 0: 
-            dp = drugId + "\t" + aT + "\t" + ",\t".join(sorted(set(targetList))) #+ "\n" # comma must be removed if this should be used to make the drugtarget panel
+        if len(targets) > 0: 
+            dp = i + "\t" + "inhibits" + "\t" + ",\t".join(sorted(set(targets))) #+ "\n" # comma must be removed if this should be used to make the drugtarget panel
             complete_dp = complete_dp + "\n" + dp
 
-        frames.clear()
-   
+        targets.clear()
+
     print(complete_dp)
-    con.close()
     
     return complete_dp
+
+def targetList(drugID, kd_limit = None, ki_limit = None, ic50_limit = None):
+    create_connection('DrugTargetInteractionDB.db')
+    frames = []
+    if kd_limit != None:
+        cursor.execute("SELECT DISTINCT drugID, HGNC FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and  Kd_max <= ?", (drugID, kd_limit))
+        df1 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "HGNC"])
+        frames.append(df1)
+
+    if ki_limit != None: 
+        cursor.execute("SELECT DISTINCT drugID, HGNC FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and  Ki_max <= ?", (drugID, ki_limit))
+        df2 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "HGNC"])
+        frames.append(df2)
+
+    if ic50_limit: 
+        cursor.execute("SELECT DISTINCT drugID, HGNC FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and  IC50_max <= ?", (drugID, ic50_limit))
+        df3 = pd.DataFrame(cursor.fetchall(), columns=["drugID", "HGNC"])
+        frames.append(df3)
+            
+    dp_df = pd.concat(frames, ignore_index=True)
+
+    targetList = []
+    for ind in dp_df.index:
+        targetList.append(dp_df["HGNC"][ind])
+
+    con.close()
+
+    return targetList
 
 def transform_value(value):
     if value == 0:
         return 0
     else: 
         return round(10 ** value, 2)
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
