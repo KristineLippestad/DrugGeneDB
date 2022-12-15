@@ -176,7 +176,11 @@ app.layout = html.Div([
             stylesheet=default_stylesheet,
         ),
         html.P(id='cytoscape-tapNodeData-output'),
-    ])], style={'margin-top': 40, 'margin-left': -20,'width':490, 'height':520, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']})
+    ])], style={'margin-top': 40, 'margin-left': -20,'width':490, 'height':520, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}),
+    html.Div([
+        dcc.Checklist(id = 'comparedDrugs-output', inline = True, style={'margin-left': -50, 'margin-top': -80, 'width':600}),
+        html.Div(id='mutualTargets-output-container', style={'margin-left': -50, 'margin-top': 20, 'width':600})
+    ], style = {'margin-top': 40, 'margin-left': -20,'width':490, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), 
 ], style={'margin-top': 20, 'margin-left': 750}),
 ])
 
@@ -189,39 +193,104 @@ app.layout = html.Div([
     Output(component_id='selectedDrugs-output', component_property='options'),
     Output(component_id='drugPanel-output', component_property='children'),
     Output(component_id='cytoscape-drugTargetNet', component_property='elements'),
-    Output('intermediate-text', 'data')], #Multiple outputs muse be placed inside a list, Output is the children property of the component with the ID 'graph-with-slicer'
+    Output('intermediate-text', 'data'),
+    Output(component_id='comparedDrugs-output', component_property='options'),
+    Output(component_id='mutualTargets-output-container', component_property='children')], #Multiple outputs muse be placed inside a list, Output is the children property of the component with the ID 'graph-with-slicer'
     [Input(component_id='drugID-dropdown', component_property='value'), 
     Input(component_id='kd--slider', component_property='value'), #multiple inputs must also be inside a list
     Input(component_id='ki--slider', component_property='value'),
     Input(component_id='ic50--slider', component_property='value'),
     Input(component_id='temp-input', component_property='value'),
     Input(component_id='ph-input', component_property='value'),
-    Input(component_id='selectedDrugs-output', component_property='value')], #need to return as many figures as you have inputs
+    Input(component_id='selectedDrugs-output', component_property='value'),
+    Input(component_id='comparedDrugs-output', component_property='value')], #need to return as many figures as you have inputs
      #State can be used if a button should be clicked to update a figure (might be used for pH, temp and to download drugpanel)
     #, prevent_initial-call=True #Doesn't trigger all call back when the page is refreshed.
     )
 
-def update_figure(drugID_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
+def update_figure(drugID_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug, comparedDrugs): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
     kd = transform_value(kd_value)
     ki = transform_value(ki_value)
     ic50 = transform_value(ic50_value)
+
+    print("compared drugs", comparedDrugs)
     
     if str(type(drugID_list)) == "<class 'NoneType'>":
-        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), no_update, no_update, no_update, no_update
+        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update
     
-    elif len(drugID_list) > 0 and selectedDrug == None:
+    elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs == None:
         dp, dpText = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         netOptions = radioItemsOptions(drugID_list)
-        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), netOptions, dp, no_update, dpText
+        checkOptions = checklistOptions(drugID_list)
+        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update
+    
+    elif len(drugID_list) > 0 and selectedDrug != None and comparedDrugs == None:
+        dp, dpText = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
+        netOptions = radioItemsOptions(drugID_list)
+        checkOptions = checklistOptions(drugID_list)
+        netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
+        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update
+
+    elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs != None:
+        dp, dpText = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
+        netOptions = radioItemsOptions(drugID_list)
+        checkOptions = checklistOptions(drugID_list)
+        netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
+        mutual = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
+        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual
+
+
     else: 
         dp, dpText = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         netOptions = radioItemsOptions(drugID_list)
+        checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), netOptions, dp, netElements, dpText
+        mutual = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
+        return 'Threshold selected for Kd: {}'.format(kd), 'Threshold selected for Ki: {}'.format(ki), u'Threshold selected for IC\u2085\u2080: {}'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual
 
 def radioItemsOptions(drugID_list):
     options = [{'label': x, 'value': x} for x in drugID_list]
     return options
+
+def checklistOptions(drugID_list):
+    options = [{'label': x, 'value': x} for x in drugID_list]
+    return options
+
+def mutualTargets(comparedDrugs, kd_limit = None, ki_limit = None, ic50_limit = None, Temp = None, pH = None):
+
+    print(comparedDrugs)
+
+    allTargets = []
+
+    for i in comparedDrugs: 
+
+        print(i)
+
+        targets = sorted(targetList(i, kd_limit, ki_limit, ic50_limit, pH, Temp))
+
+        allTargets = allTargets + targets
+
+    print(allTargets)
+
+    mutualTargets = []
+
+    print(len(comparedDrugs))
+
+    for j in allTargets:
+        x = allTargets.count(j)
+        print(x)
+        if x > 1 and x == len(comparedDrugs):
+            mutualTargets.append(j)
+    
+    mutual = 'Mutual targets: ' + ', '.join(set(mutualTargets))
+    #mutual = ', '.join(mutualTargets)
+
+    if len(mutualTargets) > 0:
+
+        return mutual
+
+    else:
+        return 'No mutual targets'
 
 def drugTargetNet(selectedDrug, kd_limit = None, ki_limit = None, ic50_limit = None, Temp = None, pH = None):
 
@@ -272,8 +341,11 @@ def drugTargetNet(selectedDrug, kd_limit = None, ki_limit = None, ic50_limit = N
 
 def minMaxValues(selectedDrug, i, kd_limit, ki_limit, ic50_limit, temp, pH):
 
-    # add WHERE Kd_max > kd_limit and so on 
+    # The min and max value is determined by the set thresholds (only measurements below the set threshold are considered)
+    # This influence the colourcode
+
     # add mode (typetall) https://www.geeksforgeeks.org/find-mean-mode-sql-server/
+
     try:
 
         create_connection('DrugTargetInteractionDB.db')
