@@ -181,5 +181,4 @@ def drugPanelBA(fileName, df):
 #TargetsAndType('/Users/kristinelippestad/Dokumenter/Master/Test_DB.db', 'KDRPanel.txt', 'KDR', 'Small molecule')
 #twoTargets('/Users/kristinelippestad/Dokumenter/Master/DTP.db', 'FLT4', 'CSF1R')
 #drug('/Users/kristinelippestad/Dokumenter/Master/DTP.db','drugTests.txt','SUNITINIB')
-targetProfileBA('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db', '/Users/kristinelippestad/Dokumenter/Master/AGSstudy10nM.txt', ['CHEMBL288441'], kd_limit = 10, ki_limit = 10, ic50_limit = 10)
-
+#targetProfileBA('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db', '/Users/kristinelippestad/Dokumenter/Master/AGSstudy10nM.txt', ['CHEMBL288441'], kd_limit = 10, ki_limit = 10, ic50_limit = 10)
