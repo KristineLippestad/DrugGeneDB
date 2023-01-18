@@ -77,10 +77,15 @@ default_stylesheet = [
 
 # Select options for selected drug IDs 
 create_connection('DrugTargetInteractionDB.db')
-drug_query = pd.read_sql_query("SELECT DISTINCT DrugID From MeasuredFor", con) # Only drugIDs with associated binding affinity values are included.
+drug_df = pd.read_sql_query("SELECT DISTINCT Drug.DrugID, DrugName From Drug INNER JOIN MeasuredFor ON Drug.DrugID = MeasuredFor.DrugID", con) # Only drugIDs with associated binding affinity values are included.
+drugList = []
+for ind in drug_df.index: 
+    d = f"{drug_df['DrugName'][ind]}: {drug_df['DrugID'][ind]}"
+    drugList.append(d)
+print(drugList[1:5])
 con.close()
 
-drug_df = pd.DataFrame(drug_query, columns = ['DrugID'])
+#drug_df = pd.DataFrame(drug_query, columns = ['DrugID'])
 
 app.layout = html.Div([
     html.Div(children=[
@@ -97,7 +102,8 @@ app.layout = html.Div([
     html.Div(children=[
         html.Label('Select drug IDs'),
         html.Br(),
-        dcc.Dropdown(drug_df['DrugID'].unique(),
+        dcc.Dropdown( #drug_df['DrugID'].unique(),
+                     drugList,
                      multi=True, # If true, the user can select multiple values
                      #value = [],
                      id='drugID-dropdown'), #list er ikke riktig
@@ -234,7 +240,7 @@ app.layout = html.Div([
     #, prevent_initial-call=True #Doesn't trigger all call back when the page is refreshed.
     )
 
-def update_figure(drugID_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug, comparedDrugs): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
+def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug, comparedDrugs): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
     """Callback function that updates the figures when a value is altered
     :param drugID_list: selected drug IDs, kd_value: selected kd threshold, ki_value: selected ki threshold, ic50_value: selected ic50 threshold, 
     temp: temperature selected for experimental conditions, ph: pH selected for experimental conditions, selectedDrug: drug selected for display of drug target network, comparedDrugs: drugs selected for comparison of targets
@@ -243,9 +249,11 @@ def update_figure(drugID_list, kd_value, ki_value, ic50_value, temp, ph, selecte
     kd = transform_value(kd_value)
     ki = transform_value(ki_value)
     ic50 = transform_value(ic50_value)
-    
+
+    drugID_list = drugList(drug_list)
+
     # No drugs are selected
-    if str(type(drugID_list)) == "<class 'NoneType'>":
+    if str(type(drug_list)) == "<class 'NoneType'>":
         return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update, no_update
     
     # Drugs are selected
@@ -280,6 +288,16 @@ def update_figure(drugID_list, kd_value, ki_value, ic50_value, temp, ph, selecte
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         mutual, mutNetElements = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
+
+def drugList(drugID_list):
+    IDlist = []
+    if str(type(drugID_list)) != "<class 'NoneType'>":
+        for i in drugID_list:
+            a = i.split(': ')
+            id = a[1]
+            IDlist.append(id)
+    print(IDlist)
+    return(IDlist)
 
 def radioItemsOptions(drugID_list):
     """Retrieve the selection of drugs that can be compared to find shared targets
