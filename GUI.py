@@ -6,8 +6,8 @@ import dash_cytoscape as cyto
 import pandas as pd
 import sqlite3
 import threading
-import math
 from aifc import Error
+from scipy.stats import sem
 
 # https://towardsdatascience.com/dashing-through-christmas-songs-using-dash-and-sql-34ef2eb4d0cb
 # https://plotly.com/python/
@@ -22,7 +22,7 @@ def create_connection(db_file):
     global cursor
 
     try:
-        con = sqlite3.connect(db_file)
+        con = sqlite3.connect(db_file, check_same_thread=False)
         cursor = con.cursor()
         print("Successfully connected to SQLite")
     except Error as e:
@@ -76,14 +76,15 @@ default_stylesheet = [
 ]
 
 # Select options for selected drug IDs 
-create_connection('DrugTargetInteractionDB.db')
+create_connection('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db')
 drug_df = pd.read_sql_query("SELECT DISTINCT Drug.DrugID, DrugName From Drug INNER JOIN MeasuredFor ON Drug.DrugID = MeasuredFor.DrugID", con) # Only drugIDs with associated binding affinity values are included.
 drugList = []
 for ind in drug_df.index: 
     d = f"{drug_df['DrugName'][ind]}: {drug_df['DrugID'][ind]}"
     drugList.append(d)
-print(drugList[1:5])
 con.close()
+
+create_connection('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db')
 
 #drug_df = pd.DataFrame(drug_query, columns = ['DrugID'])
 
@@ -175,7 +176,7 @@ app.layout = html.Div([
             html.Button("download-drug-panel", id='btn_drugpanel'), 
             dcc.Store(id='intermediate-text'),
             dcc.Download(id="download-text")
-            ], style={'margin-top': -642, 'margin-left': 318}),
+            ], style={'margin-top': -642, 'margin-left': 295}),
     
     # Show drug panel
     html.Div([
@@ -187,8 +188,10 @@ app.layout = html.Div([
     # Drug options
     html.Div([
         html.H3('Drug Target Network', style = {'margin-left': -75, 'margin-top': -80, 'width':600}),
+        html.P("The figure displays the selected drug and it's associated targets. Node size is determined by the lowest binding affinity value measured between the drug target pair. Dark grey node colour indicates that multiple binding affinity measurments are stored for the drug target pairs.", 
+        style = {'margin-left': -75, 'margin-top': 10, 'width':600}),
         html.Div([dcc.RadioItems(id = 'selectedDrugs-output')
-        ], style = {'margin-left': -75, 'margin-top': -10, 'width':600}),
+        ], style = {'margin-left': -75, 'margin-top': 10, 'width':490}),
     
     # Network dispalying a selected drug and it's target profile 
     html.Div([
@@ -198,19 +201,20 @@ app.layout = html.Div([
             stylesheet=default_stylesheet,
         ),
         html.P(id='cytoscape-tapNodeData-output'),
-    ])], style={'margin-top': 40, 'margin-left': -20,'width':490, 'height':520, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}),
+    ])], style={'margin-top': 40, 'margin-left': -20,'width':490, 'height':650, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}),
     
     # Selection of drugs and comparison of the mutual targets
     html.Div([
         html.H3('Shared Targets', style = {'margin-left': -75, 'margin-top': -80, 'width':600}),
-        dcc.Checklist(id = 'comparedDrugs-output', inline = True, style={'margin-left': -75, 'margin-top': -10, 'width':600}),
-        html.Div(id='mutualTargets-output-container', style={'margin-left': -75, 'margin-top': 20, 'width':600}),
+        html.P('The figure display the targets that are shared between the selected drugs.', style = {'margin-left': -75, 'margin-top': 10, 'width':600}),
+        dcc.Checklist(id = 'comparedDrugs-output', inline = True, style={'margin-left': -75, 'margin-top': 10, 'width':600}),
         html.Div([
         cyto.Cytoscape(
             id='cytoscape-mutualTargetNet',
             layout={'name': 'preset'},
             stylesheet=default_stylesheet,
         )]),
+        html.Div(id='mutualTargets-output-container', style={'margin-left': -75, 'margin-top': 20, 'width':600}),
     ], style = {'margin-top': 40, 'margin-left': -20,'width':490, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), 
 ], style={'margin-top': 20, 'margin-left': 750}),
 ])
@@ -235,10 +239,11 @@ app.layout = html.Div([
     Input(component_id='temp-input', component_property='value'),
     Input(component_id='ph-input', component_property='value'),
     Input(component_id='selectedDrugs-output', component_property='value'),
-    Input(component_id='comparedDrugs-output', component_property='value')], #need to return as many figures as you have inputs
+    Input(component_id='comparedDrugs-output', component_property='value')] #need to return as many figures as you have inputs
      #State can be used if a button should be clicked to update a figure (might be used for pH, temp and to download drugpanel)
     #, prevent_initial-call=True #Doesn't trigger all call back when the page is refreshed.
     )
+
 
 def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug, comparedDrugs): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
     """Callback function that updates the figures when a value is altered
@@ -296,7 +301,7 @@ def drugList(drugID_list):
             a = i.split(': ')
             id = a[1]
             IDlist.append(id)
-    print(IDlist)
+
     return(IDlist)
 
 def radioItemsOptions(drugID_list):
@@ -427,7 +432,7 @@ def drugTargetNet(selectedDrug, kd_limit = None, ki_limit = None, ic50_limit = N
         targetData = {}
         targetData['id'] = i
         targetData['label'] = i
-        targetData['size'] = min_value*100
+        targetData['size'] = 100/min_value
 
         targetPosition = {}
         targetPosition['x'] = a
@@ -473,7 +478,7 @@ def minMaxValues(selectedDrug, target, kd_limit, ki_limit, ic50_limit, temp, pH)
 
     try:
 
-        create_connection('DrugTargetInteractionDB.db')
+        #create_connection('DrugTargetInteractionDB.db')
         
         lock.acquire(True)
 
@@ -617,13 +622,17 @@ def minMaxValues(selectedDrug, target, kd_limit, ki_limit, ic50_limit, temp, pH)
 
             if ic50_max != None: 
                 max_values.append(float(ic50_max))                
-            
-        con.close()
-        
-        min_value = min(min_values)
-        max_value = max(max_values)
 
-        return min_value, max_value
+        if min_values and max_values: 
+            min_value = min(min_values)
+            max_value = max(max_values)
+
+            #con.close()
+
+            return min_value, max_value
+        
+        else: 
+            return None, None
 
     finally:
         lock.release()
@@ -664,7 +673,7 @@ def targetList(drugID, kd_limit, ki_limit, ic50_limit, pH, temp):
     
     try:
 
-        create_connection('DrugTargetInteractionDB.db')
+        #create_connection('DrugTargetInteractionDB.db')
         
         lock.acquire(True)
 
@@ -693,8 +702,7 @@ def targetList(drugID, kd_limit, ki_limit, ic50_limit, pH, temp):
         for ind in df.index:
             targetList.append(df["HGNC"][ind])
 
-        con.close()
-
+        #con.close()
         return targetList
     
     finally:
@@ -713,10 +721,16 @@ def transform_value(value):
 @app.callback(Output('cytoscape-tapNodeData-output', 'children'),
               Input('selectedDrugs-output', 'value'),
               Input('cytoscape-drugTargetNet', 'tapNodeData'),
+              Input(component_id='kd--slider', component_property='value'), #multiple inputs must also be inside a list
+              Input(component_id='ki--slider', component_property='value'),
+              Input(component_id='ic50--slider', component_property='value'),
+              Input(component_id='temp-input', component_property='value'),
+              Input(component_id='ph-input', component_property='value'),
 
-              prevent_initial_call=True)
+              prevent_initial_call=True
+              )
 
-def displayTapNodeData(drug, data):
+def displayTapNodeData(drug, data, kd_limit, ki_limit, ic50_limit, Temp, pH):
     """Define text with binding affinity information when a node is tapped.
     :param drug: tapped drug node, data: data belonging to the tapped node
     :return: text representing binding affinity measurments for the drug target pair. """
@@ -725,7 +739,136 @@ def displayTapNodeData(drug, data):
 
         target = data['id']
 
-        return f'Lowest binding affinity measured between {drug} and {target}: {data["size"]/100} nM'
+        kd = transform_value(kd_limit)
+        ki = transform_value(ki_limit)
+        ic50 = transform_value(ic50_limit)
+
+        minValue, maxValue = minMaxValues(drug, target, kd, ki, ic50, Temp, pH)
+
+        if not minValue and not maxValue:
+            return f'Click on a target node for binding affinity information.'
+
+        elif minValue != maxValue:
+
+            sem_value = calculateSem(drug, data, kd, ki, ic50, Temp, pH)
+
+            return f'Binding affinity measured between {drug} and {target}: {minValue} nM to {maxValue} nM. Standard error of the mean is calculated to {sem_value}'
+
+        else:
+            return f'Binding affinity measured between {drug} and {target}: {minValue} nM'
+
+def calculateSem(drug, data, kd, ki, ic50, temp, pH):
+    
+    try:
+
+        #create_connection('DrugTargetInteractionDB.db')
+        
+        lock.acquire(True)
+
+        target = data['id']
+
+        values = []
+
+        a = 0
+        
+        if temp != None and pH == None:
+            cursor.execute("SELECT Kd_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ? and Temperature = ?", (drug, target, kd, temp))
+            kd_df = pd.DataFrame(cursor.fetchall(), columns=["Kd_max"])
+            values.extend(kd_df['Kd_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ? and Temperature = ?", (drug, target, kd, temp))            
+            kdCount_df = pd.DataFrame(cursor.fetchall())
+            a += kdCount_df[0][0]
+
+            cursor.execute("SELECT Ki_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ? and Temperature = ?", (drug, target, ki, temp))
+            ki_df = pd.DataFrame(cursor.fetchall(), columns=["Ki_max"])
+            values.extend(ki_df['Ki_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ? and Temperature = ?", (drug, target, ki, temp))            
+            kiCount_df = pd.DataFrame(cursor.fetchall())
+            a += kiCount_df[0][0]
+
+            cursor.execute("SELECT IC50_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ? and Temperature = ?", (drug, target, ic50, temp))
+            ic50_df = pd.DataFrame(cursor.fetchall(), columns=["IC50_max"])
+            values.extend(ic50_df['IC50_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ? and Temperature = ?", (drug, target, ic50, temp))            
+            ic50Count_df = pd.DataFrame(cursor.fetchall())
+            a += ic50Count_df[0][0]
+
+        elif temp == None and pH != None:
+            cursor.execute("SELECT Kd_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ? and pH = ?", (drug, target, kd, pH))
+            kd_df = pd.DataFrame(cursor.fetchall(), columns=["K_max"])
+            values.extend(kd_df['Kd_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ? and pH = ?", (drug, target, kd, pH))            
+            kdCount_df = pd.DataFrame(cursor.fetchall())
+            a += kdCount_df[0][0]
+
+            cursor.execute("SELECT Ki_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ? and pH = ?", (drug, target, ki, pH))
+            ki_df = pd.DataFrame(cursor.fetchall(), columns=["Ki_max"])
+            values.extend(ki_df['Ki_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ? and pH = ?", (drug, target, ki, pH))            
+            kiCount_df = pd.DataFrame(cursor.fetchall())
+            a += kiCount_df[0][0]
+
+            cursor.execute("SELECT IC50_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ? and pH = ?", (drug, target, ic50, pH))
+            ic50_df = pd.DataFrame(cursor.fetchall(), columns=["IC50_max"])
+            values.extend(ic50_df['IC50_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ? and pH = ?", (drug, target, ic50, pH))            
+            ic50Count_df = pd.DataFrame(cursor.fetchall())
+            a += ic50Count_df[0][0] 
+
+        elif temp != None and pH != None:
+
+            cursor.execute("SELECT Kd_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ? and Temperature = ? and pH = ?", (drug, target, kd, temp, pH))
+            kd_df = pd.DataFrame(cursor.fetchall(), columns=["Kd_max"])
+            values.extend(kd_df['Kd_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ? and Temperature = ? and pH = ?", (drug, target, kd, temp, pH))            
+            kdCount_df = pd.DataFrame(cursor.fetchall())
+            a += kdCount_df[0][0]
+
+            cursor.execute("SELECT Ki_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ? and Temperature = ? and pH = ?", (drug, target, ki, temp, pH))
+            ki_df = pd.DataFrame(cursor.fetchall(), columns=["Ki_max"])
+            values.extend(ki_df['Ki_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ? and Temperature = ? and pH = ?", (drug, target, ki, temp, pH))            
+            kiCount_df = pd.DataFrame(cursor.fetchall())
+            a += kiCount_df[0][0]
+
+            cursor.execute("SELECT IC50_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ? and Temperature = ? and pH = ?", (drug, target, ic50, temp, pH))
+            ic50_df = pd.DataFrame(cursor.fetchall(), columns=["IC50_max"])
+            values.extend(ic50_df['IC50_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ? and Temperature = ? and pH = ?", (drug, target, ic50, temp, pH))            
+            ic50Count_df = pd.DataFrame(cursor.fetchall())
+            a += ic50Count_df[0][0]
+        
+        else: 
+
+            cursor.execute("SELECT Kd_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ?", (drug, target, kd))
+            kd_df = pd.DataFrame(cursor.fetchall(), columns=["Kd_max"])
+            values.extend(kd_df['Kd_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Kd_max <= ?", (drug, target, kd))            
+            kdCount_df = pd.DataFrame(cursor.fetchall())
+            a += kdCount_df[0][0]
+
+            cursor.execute("SELECT Ki_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ?", (drug, target, ki))
+            ki_df = pd.DataFrame(cursor.fetchall(), columns=["Ki_max"])
+            values.extend(ki_df['Ki_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and Ki_max <= ?", (drug, target, ki))            
+            kiCount_df = pd.DataFrame(cursor.fetchall())
+            a += kiCount_df[0][0]
+
+            cursor.execute("SELECT IC50_max FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ?", (drug, target, ic50))
+            ic50_df = pd.DataFrame(cursor.fetchall(), columns=["IC50_max"])
+            values.extend(ic50_df['IC50_max'].tolist())
+            cursor.execute("SELECT COUNT(*) AS n FROM MeasuredFor INNER JOIN BindingAffinity ON MeasuredFor.BindingReactionID = BindingAffinity.BindingReactionID WHERE DrugID = ? and HGNC = ? and IC50_max <= ?", (drug, target, ic50))            
+            ic50Count_df = pd.DataFrame(cursor.fetchall())
+            a += ic50Count_df[0][0]
+
+        value = sem(values)
+                   
+        #con.close()
+
+        return value
+
+    finally:
+        lock.release()
 
         
 
@@ -751,3 +894,8 @@ def func(n_clicks, intText, name):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+con.close()
+
+

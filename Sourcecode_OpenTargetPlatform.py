@@ -164,4 +164,11 @@ insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteracti
 insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL258844", "AKTI-1,2", "Small molecule")
 insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "PI103", "Small molecule")
 insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL578512", "PKF118-310", "Small molecule")
-
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL2216824", "JNK-IN-8 (JNK Inhibitor XVI)", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573107", "BI-D1870", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1789941", "Ruxolitinib (INCB18424)", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1824446", "SB-505124", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL410456", "D4476", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1337170", "Static", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1765740", "GSK2334470", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL2177736", "PRT-062607 (P505-15)", "Small molecule")

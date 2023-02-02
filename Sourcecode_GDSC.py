@@ -81,7 +81,7 @@ def chemblID_dict(drug_file, drugId, Synonyms):
     return drug_dict
 
 drug_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_drug.tsv", "Parent Molecule", "Synonyms")
-smallMolecule_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_smallmolecule.tsv", "Parent Molecule", "Synonyms")
+smallMolecule_dict = chemblID_dict("/Users/kristinelippestad/Dokumenter/Master/chembl_smallmolecule.tsv", "Parent Molecule", "Synonyms")
 protein_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_protein.tsv", "Parent Molecule", "Synonyms")
 unknown_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_unknown.tsv", "Parent Molecule", "Synonyms")
 cell_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_cell.tsv", "Parent Molecule", "Synonyms")
@@ -106,7 +106,7 @@ def insertGeneInputsIntoGene(db_file, gdsc_file, target, geneName):
             for t in target_list:
                 symbol = t #fikse dette
                 uniprotID = None 
-                name = df[name][ind] #Fikse detet
+                name = df[name][ind] #Fikse dette
                 cursor.execute("INSERT OR REPLACE INTO Gene VALUES (?, ?, ?)", (symbol, uniprotID, name))
                 con.commit()
     con.close()
@@ -173,7 +173,7 @@ def insertCellLines(db_file, gdsc_file, clo_file, name, tissue, tissueSubType, c
     con.close()
 
 def cloDict(clo_file, cloId, name):
-    """Make a dictionary with name of cell line ontology id as keys and Cell Line Ontology ID as values. 
+    """Make a dictionary with name of cell line ontology id as keys and cell line synonyms as values. 
     :param clo: clo_file: Cell Line Ontology (CLO) csv file downloaded from https://bioportal.bioontology.org/ontologies/CLO, cloId: column name for CLO id, cloName: column name for cell line name in clo file
     :return: dictionary with cell line ontology id as key and cell line synonyms as value. 
     """
