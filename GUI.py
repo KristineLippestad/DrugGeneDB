@@ -214,7 +214,7 @@ app.layout = html.Div([
             layout={'name': 'preset'},
             stylesheet=default_stylesheet,
         )]),
-        html.Div(id='mutualTargets-output-container', style={'margin-left': -75, 'margin-top': 20, 'width':600}),
+        html.Div(id='mutualTargets-output-container', style={'margin-left': -20, 'margin-top': 20, 'width':600}),
     ], style = {'margin-top': 40, 'margin-left': -20,'width':490, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), 
 ], style={'margin-top': 20, 'margin-left': 750}),
 ])
@@ -750,9 +750,9 @@ def displayTapNodeData(drug, data, kd_limit, ki_limit, ic50_limit, Temp, pH):
 
         elif minValue != maxValue:
 
-            sem_value = calculateSem(drug, data, kd, ki, ic50, Temp, pH)
+            sem_value = round(calculateSem(drug, data, kd, ki, ic50, Temp, pH),3)
 
-            return f'Binding affinity measured between {drug} and {target}: {minValue} nM to {maxValue} nM. Standard error of the mean is calculated to {sem_value}'
+            return f'Binding affinity measured between {drug} and {target}: {minValue} nM to {maxValue} nM. Standard error of the mean is calculated to {sem_value}.'
 
         else:
             return f'Binding affinity measured between {drug} and {target}: {minValue} nM'
