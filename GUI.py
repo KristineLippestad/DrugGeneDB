@@ -259,14 +259,14 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
 
     # No drugs are selected
     if str(type(drug_list)) == "<class 'NoneType'>":
-        return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update, no_update
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update, no_update
     
     # Drugs are selected
     elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs == None:
         dp, dpText = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         netOptions = radioItemsOptions(drugID_list)
         checkOptions = checklistOptions(drugID_list)
-        return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update, no_update
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update, no_update
     
     # The drug that will be displayed in a network with it's targets is selected
     elif len(drugID_list) > 0 and selectedDrug != None and comparedDrugs == None:
@@ -274,7 +274,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         netOptions = radioItemsOptions(drugID_list)
         checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update, no_update
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update, no_update
 
     # Drugs are selected to be compared to find shared targets
     elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs != None:
@@ -283,7 +283,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         mutual, mutNetElements = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
 
     # A drug is selected to be displayed in a network with it's targets and drugs are selected to be compared to find shared targets
     else: 
@@ -292,7 +292,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         mutual, mutNetElements = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {} \u03BCM'.format(kd), 'Threshold selected for Ki: {} \u03BCM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} \u03BCM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
 
 def drugList(drugID_list):
     IDlist = []
