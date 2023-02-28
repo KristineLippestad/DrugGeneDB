@@ -173,3 +173,6 @@ def insertSingleDrug(db_file, drugId, drugName, type):
 #insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1765740", "GSK2334470", "Small molecule")
 #insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL2177736", "PRT-062607 (P505-15)", "Small molecule")
 #insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL852", "MELPHALAN", "Small molecule")
+#insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL4522930", "BI605906 (BIX02514)", "Small molecule")
+#insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "10058-F4", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL375312", "GSK429286", "Small molecule")

@@ -254,8 +254,12 @@ def insertSingleBindingAffinity(db_file, drugID, hgnc, Source, Kd_min = None, Kd
 #insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "MYLK", "doi:10.1038/nbt1358", Kd_min = 1500, Kd_max = 1500,  temp = 25, Organism = "Homo sapiens")
 #insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "PIK3CA", "doi:10.1038/nbt1358", Kd_min = 1.5, Kd_max = 1.5,  temp = 25, Organism = "Homo sapiens")
 #insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "RAF1", "doi:10.1038/nbt1358", Kd_min = 3700, Kd_max = 3700,  temp = 25, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL4522930", "IKBKB", "doi:10.1042/BJ20101701", ic50_min = 380, ic50_max = 380,  pH = 7.5, temp = 30, Organism = "Homo sapiens")
+#insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL4522930", "IGF1", "doi:10.1042/BJ20101701", ic50_min = 7600, ic50_max = 7600,  pH = 7.5, temp = 30, Organism = "Homo sapiens")
+insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "MYC", "doi.org/10.1016/j.chembiol.2008.09.011", Kd_min = 4600, Kd_max = 6400, temp = 25, Organism = "Homo sapiens")
+insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "MYC", "doi.org/10.1371/journal.pone.0097285", Kd_min = 31600, Kd_max = 47800, temp = 25, Organism = "Homo sapiens")
+insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "MYCN", "doi.org/10.1371/journal.pone.0097285", Kd_min = 31300, Kd_max = 52500, temp = 25, Organism = "Homo sapiens")
 
- 
 
 
 
