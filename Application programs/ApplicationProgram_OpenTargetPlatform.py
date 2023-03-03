@@ -51,7 +51,7 @@ def insertDrugInputsIntoDrug(db_file, OTP_file, drugId, drugName, type):
             drugID = df[drugId][ind]
             name = df[drugName][ind]
             moleculeType = df[type][ind]
-            cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, moleculeType))
+            cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, moleculeType, None, None))
             con.commit()
     con.close()
 
@@ -146,7 +146,7 @@ def insertIndicatedForInputsIntoIndicatedFor(db_file, OTP_file, diseaseId, drugI
 
 def insertSingleDrug(db_file, drugId, drugName, type):
     create_connection(db_file)
-    cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugId, drugName, type))
+    cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugId, drugName, type, None, None))
     con.commit()
     con.close()
 
@@ -173,6 +173,6 @@ def insertSingleDrug(db_file, drugId, drugName, type):
 #insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1765740", "GSK2334470", "Small molecule")
 #insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL2177736", "PRT-062607 (P505-15)", "Small molecule")
 #insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL852", "MELPHALAN", "Small molecule")
-#insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL4522930", "BI605906 (BIX02514)", "Small molecule")
-#insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "10058-F4", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL4522930", "BI605906 (BIX02514)", "Small molecule")
+insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "10058-F4", "Small molecule")
 insertSingleDrug("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL375312", "GSK429286", "Small molecule")

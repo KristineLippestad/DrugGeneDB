@@ -39,23 +39,23 @@ def insertDrugs(db_file, gdsc_file, drugName):
             drugID = str([k for k, v in drug_dict.items() if name in v]).strip("[']")
             # Verify whether name is in the list of values for each key
             if any(name in sublist for sublist in smallMolecule_dict.values()): # Retrive chembl ID from name + synonyms (get key from value where value is in a list)
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Small molecule'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Small molecule', None, None))
             elif any(name in sublist for sublist in protein_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Protein'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Protein', None, None))
             elif any(name in sublist for sublist in unknown_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Unknown'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Unknown', None, None))
             elif any(name in sublist for sublist in cell_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Cell'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Cell', None, None))
             elif any(name in sublist for sublist in antibody_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Antibody'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Antibody', None, None))
             elif any(name in sublist for sublist in oligonucleotide_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Oligonucleotide'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Oligonucleotide', None, None))
             elif any(name in sublist for sublist in enzyme_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Enzyme'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Enzyme', None, None))
             elif any(name in sublist for sublist in oligosaccharide_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Oligosaccharide'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Oligosaccharide', None, None))
             elif any(name in sublist for sublist in gene_dict.values()):
-                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?)", (drugID, name, 'Gene'))
+                cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugID, name, 'Gene', None, None))
             else:
                 a += 1
             con.commit()

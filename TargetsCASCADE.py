@@ -25,6 +25,7 @@ for k, v in cas2_dict.items():
         val = v.split(", ")
         cas2_dict.update({k: val})
 
+cas2_dict.update({"ACVR1": ["ACVR1B", "ACVR1C"]})
 
 def targetProfileFromFile(drugPanelFile, HGNCtoNodeDict, fileName):
     targetProfiles = []
@@ -68,31 +69,32 @@ def targetProfile(drugPanel, HGNCtoNodeDict):
     print(f'{drug}: {targetProfile}')
 
 #CASCADE 1.0
-#print('10 nM')
-#targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_10nM.txt", cas1_dict, "filt_dp_10nM.txt")
+"""
+print('10 nM')
+targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_10nM.txt", cas1_dict, "filt_dp_10nM.txt")
 
-#print('100 nM')
-#targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_100nM.txt", cas1_dict, "filt_dp_100nM.txt")
+print('100 nM')
+targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_100nM.txt", cas1_dict, "filt_dp_100nM.txt")
 
-#print('1 uM')
-#targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_1uM.txt", cas1_dict, "filt_dp_1uM.txt")
+print('1 uM')
+targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_1uM.txt", cas1_dict, "filt_dp_1uM.txt")
 
-#print('10 uM')
-#targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_10uM.txt", cas1_dict, "filt_dp_10uM.txt")
+print('10 uM')
+targetProfileFromFile("/Users/kristinelippestad/Downloads/dp_10uM.txt", cas1_dict, "filt_dp_10uM.txt")"""
 
 #CASCADE 2.0
 
 print('10 nM')
-targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_10nM.txt", cas2_dict, "cas2.0_filt_dp_10nM.txt")
+targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_10nM.txt", cas2_dict, "cas2.0_f_dp_10nM.txt")
 
 print('100 nM')
-targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_100nM.txt", cas2_dict, "cas2.0_filt_dp_100nM.txt")
+targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_100nM.txt", cas2_dict, "cas2.0_f_dp_100nM.txt")
 
 print('1 uM')
-targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_1uM.txt", cas2_dict, "cas2.0_filt_dp_1uM.txt")
+targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_1uM.txt", cas2_dict, "cas2.0_f_dp_1uM.txt")
 
 print('10 uM')
-targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_10uM.txt", cas2_dict, "cas2.0_filt_dp_10uM.txt")
+targetProfileFromFile("/Users/kristinelippestad/Downloads/cas2.0_dp_10uM.txt", cas2_dict, "cas2.0_f_dp_10uM.txt")
 
 
 

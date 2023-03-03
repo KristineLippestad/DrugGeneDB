@@ -8,6 +8,8 @@ CREATE TABLE "Drug" (
 	"DrugID"	TEXT NOT NULL UNIQUE,
 	"DrugName"	TEXT NOT NULL,
 	"Type"	TEXT,
+	"Smiles"	TEXT,
+	"InChi Key"	TEXT,
 	PRIMARY KEY("DrugID")
 );
 
