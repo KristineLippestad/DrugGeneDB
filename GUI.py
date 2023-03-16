@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Input, Output, dash_table, no_update
+from dash import Dash, html, dcc, Input, Output, no_update
 from dash.exceptions import PreventUpdate
 import dash_cytoscape as cyto
 
@@ -7,7 +7,6 @@ import sqlite3
 import threading
 from aifc import Error
 from scipy.stats import sem
-from collections import OrderedDict
 
 # https://towardsdatascience.com/dashing-through-christmas-songs-using-dash-and-sql-34ef2eb4d0cb
 # https://plotly.com/python/
@@ -373,7 +372,7 @@ def checklistOptionsSensitivity(drugID_list):
     """Retrieve the selection of drugs that can be choosen to be displayed in a network with it's sensitivity 
     towards cell lines.
     :param drugID_list: selected drug IDs
-    :return: checklist for selection of drugs in shared targets box"""
+    :return: radio items for selected where sensitivity data is provided."""
 
     try:
         
@@ -395,7 +394,7 @@ def dropdownOptionsSensitivity(selectedSensDrug):
     """Retrieve the selection of cell lines that can be choosen to be display sensitivity 
     towards cell lines.
     :param: selectedSensDrug: selected drug for sensitivty analysis
-    :return: checklist for selection of drugs in shared targets box"""
+    :return: dropdown showing cell lines where sensitivity data is provided."""
 
     try:
         
@@ -415,42 +414,10 @@ def dropdownOptionsSensitivity(selectedSensDrug):
     finally:
         lock.release()
 
-
-"""def  senOutput(selectedSensDrug, selectedCellLines):
-
-    try:
-        
-        lock.acquire(True)
-
-        if selectedCellLines == None and selectedCellLines == None: 
-
-            return ["Select a cell line to get sensitivity data."]
-        
-        elif selectedCellLines != None and selectedCellLines == None: 
-
-            return ["Select a cell line to get sensitivity data."]
-
-        else: 
-
-            d = []
-            # d = {}
-
-            for i in selectedCellLines:
-                cursor.execute("SELECT CLO FROM CellLine WHERE Name = ?", (i,))
-                df_clo = pd.DataFrame(cursor.fetchall())
-                cursor.execute("SELECT Name, IC50, AUC FROM CellLine INNER JOIN Sensitivity ON (CellLine.CLO = Sensitivity.CLO) WHERE Sensitivity.DrugID = ? and Sensitivity.CLO = ?", (selectedSensDrug, df_clo[0][0],))
-                df = pd.DataFrame(cursor.fetchall(), columns=["Name", "IC50", "AUC"])
-                d.append(f'{df["Name"][0]}')
-                d.append(html.Br())
-                d.append(f'IC\u2085\u2080:   {round(df["IC50"][0], 3)} \u03BCM, AUC:   {round(df["AUC"][0], 3)} \u03BCM')
-                d.append(html.Br())
-
-            return d
-    
-    finally:
-        lock.release()"""
-
 def  senOutput(selectedSensDrug, selectedCellLines):
+    """Generates text with sensitivity data generated for the selected drug and cell lines.
+    :param: selectedSensDrug: selected drug for sensitivity analysis, selectedCellLines: selected cell lines for sensitivity analysis
+    :return: text with sensitivity data generated for the selected drug and cell lines."""
 
     try:
         
