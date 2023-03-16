@@ -1,6 +1,5 @@
-from dash import Dash, html, dcc, Input, Output, exceptions, no_update
+from dash import Dash, html, dcc, Input, Output, dash_table, no_update
 from dash.exceptions import PreventUpdate
-import plotly.express as px
 import dash_cytoscape as cyto
 
 import pandas as pd
@@ -8,6 +7,7 @@ import sqlite3
 import threading
 from aifc import Error
 from scipy.stats import sem
+from collections import OrderedDict
 
 # https://towardsdatascience.com/dashing-through-christmas-songs-using-dash-and-sql-34ef2eb4d0cb
 # https://plotly.com/python/
@@ -99,7 +99,7 @@ app.layout = html.Div([
         })
     ]), # H Head line (number indicates size (1-6))
 
-    # Selection of drug IDs 
+    # Selection of drugss 
     html.Div(children=[
         html.Label('Select drug IDs'),
         html.Br(),
@@ -161,34 +161,63 @@ app.layout = html.Div([
 
         'Temperature: ',
         dcc.Input(id='temp-input', type='number'),
+        html.Br(),
+        html.Br(),
 
-        html.Br(),
-        html.Br(),
         "pH: ",
         dcc.Input(id='ph-input', type='number')
         ], style={'margin-top': 120, 'margin-left': 80, 'padding': 10, 'width':250, 'borderRadius': '10px', 'backgroundColor': colors['background']}), # H Head line (number indicates size (1-6))),
 
+    # Drug sensitity options
+    html.Div([
+        html.H3('Drug Sensitivity', style = {'margin-left': -75, 'margin-top': -80, 'width':600}),
+        html.P("Sensitivity data is shown for the selected drug and cell lines. Sensitivity data is not available if the drug doesn't show up as an option.", 
+        style = {'margin-left': -75, 'margin-top': 1, 'width':560}),
+        html.Div([dcc.RadioItems(id = 'selectedSensDrug-output')
+        ], style = {'margin-left': -75, 'margin-top': 10,'width':420}),
+    
+    # Dropdown to select cell lines 
+    html.Div(children=[
+        html.Label('Select cell lines'),
+        html.Br(),
+        dcc.Dropdown(multi=True, # If true, the user can select multiple values
+                     id='cellLine-dropdown'), #list er ikke riktig
+     ], style={'margin-bottom': -80, 'margin-top': 10, 'margin-left': -75, 'width':500}),
+
+    # Sensitivity information
+    html.Div([
+        #dash_table.DataTable(id='sensitivity-output')
+        html.P(id='sensitivity-output'),
+    ], style={'margin-top': 100, 'margin-left': -70,'width':550}), #'margin-top': -800, 'padding': 100, 'padding-left': '21.5%', 'width':250, 
+    
+
+    
+    ], style={'margin-top': 40, 'margin-left': 80,'width':420, 'height':250, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}),
+    
+
+
+    html.Div([
+    
     # Downlowd drug panel 
     html.Div([
-    html.Div([
-            'Filename: ',
-            dcc.Input(id='filename-input', value='drugPanel', type='text'),
-            html.Button("download-drug-panel", id='btn_drugpanel'), 
-            dcc.Store(id='intermediate-text'),
-            dcc.Download(id="download-text")
-            ], style={'margin-top': -642, 'margin-left': 295}),
+        'Filename: ',
+        dcc.Input(id='filename-input', value='drugPanel', type='text'),
+        html.Button("download-drug-panel", id='btn_drugpanel'), 
+        dcc.Store(id='intermediate-text'),
+        dcc.Download(id="download-text")
+    ], style={'margin-top': -1526, 'margin-left': 295}),
     
     # Show drug panel
     html.Div([
         html.H3('Drug Panel', style = {'margin-left': -75, 'margin-top': -80, 'width':600}),
         html.Br(),
         html.P(id='drugPanel-output', style = {'margin-left': -75, 'margin-top': -30, 'width':600})
-    ], style={'margin-top': 5, 'margin-left': -20,'width':490, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), #'margin-top': -800, 'padding': 100, 'padding-left': '21.5%', 'width':250, 
+    ], style={'margin-top': 0, 'margin-left': -20,'width':490, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), #'margin-top': -800, 'padding': 100, 'padding-left': '21.5%', 'width':250, 
     
     # Drug options
     html.Div([
         html.H3('Drug Target Network', style = {'margin-left': -75, 'margin-top': -80, 'width':600}),
-        html.P("The figure displays the selected drug and it's associated targets. Node size is determined by the lowest binding affinity value measured between the drug target pair. Dark grey node colour indicates that multiple binding affinity measurments are stored for the drug target pairs.", 
+        html.P("The figure displays the selected drug and its associated targets. Node size is determined by the lowest binding affinity value measured between the drug target pair. The dark grey node colour indicates that multiple binding affinity measurements are stored for the drug target pairs.", 
         style = {'margin-left': -75, 'margin-top': 10, 'width':600}),
         html.Div([dcc.RadioItems(id = 'selectedDrugs-output')
         ], style = {'margin-left': -75, 'margin-top': 10, 'width':490}),
@@ -203,6 +232,7 @@ app.layout = html.Div([
         html.P(id='cytoscape-tapNodeData-output'),
     ])], style={'margin-top': 40, 'margin-left': -20,'width':490, 'height':650, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}),
     
+
     # Selection of drugs and comparison of the mutual targets
     html.Div([
         html.H3('Shared Targets', style = {'margin-left': -75, 'margin-top': -80, 'width':600}),
@@ -216,7 +246,7 @@ app.layout = html.Div([
         )]),
         html.Div(id='mutualTargets-output-container', style={'margin-left': -20, 'margin-top': 20, 'width':600}),
     ], style = {'margin-top': 40, 'margin-left': -20,'width':490, 'padding':100, 'borderRadius': '10px','backgroundColor': colors['background']}), 
-], style={'margin-top': 20, 'margin-left': 750}),
+], style={'margin-top': 419, 'margin-left': 750}),
 ])
 
 #Every callback needs at least one oínput and one output
@@ -231,7 +261,11 @@ app.layout = html.Div([
     Output('intermediate-text', 'data'),
     Output(component_id='comparedDrugs-output', component_property='options'),
     Output(component_id='mutualTargets-output-container', component_property='children'),
-    Output(component_id='cytoscape-mutualTargetNet', component_property='elements')], #Multiple outputs must be placed inside a list, Output is the children property of the component with the ID 'graph-with-slicer'
+    Output(component_id='cytoscape-mutualTargetNet', component_property='elements'),
+    Output(component_id='selectedSensDrug-output', component_property='options'),
+    Output(component_id='cellLine-dropdown', component_property='options'),
+    #Output(component_id='sensitivity-output', component_property='data')],
+    Output(component_id='sensitivity-output', component_property='children')], #Multiple outputs must be placed inside a list, Output is the children property of the component with the ID 'graph-with-slicer'
     [Input(component_id='drugID-dropdown', component_property='value'), 
     Input(component_id='kd--slider', component_property='value'), #multiple inputs must also be inside a list
     Input(component_id='ki--slider', component_property='value'),
@@ -239,13 +273,15 @@ app.layout = html.Div([
     Input(component_id='temp-input', component_property='value'),
     Input(component_id='ph-input', component_property='value'),
     Input(component_id='selectedDrugs-output', component_property='value'),
-    Input(component_id='comparedDrugs-output', component_property='value')] #need to return as many figures as you have inputs
+    Input(component_id='comparedDrugs-output', component_property='value'),
+    Input(component_id='selectedSensDrug-output', component_property='value'),
+    Input(component_id='cellLine-dropdown', component_property='value')] #need to return as many figures as you have inputs
      #State can be used if a button should be clicked to update a figure (might be used for pH, temp and to download drugpanel)
     #, prevent_initial-call=True #Doesn't trigger all call back when the page is refreshed.
     )
 
 
-def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug, comparedDrugs): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
+def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedDrug, comparedDrugs, selectedSensDrug, selectedCellLines): # Input referes to component property of input, same as saying that the input is the value declared in app.layout. 
     """Callback function that updates the figures when a value is altered
     :param drugID_list: selected drug IDs, kd_value: selected kd threshold, ki_value: selected ki threshold, ic50_value: selected ic50 threshold, 
     temp: temperature selected for experimental conditions, ph: pH selected for experimental conditions, selectedDrug: drug selected for display of drug target network, comparedDrugs: drugs selected for comparison of targets
@@ -259,14 +295,17 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
 
     # No drugs are selected
     if str(type(drug_list)) == "<class 'NoneType'>":
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update, no_update
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
     
     # Drugs are selected
     elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs == None:
         dp, dpText = targetProfileBA(drugID_list, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         netOptions = radioItemsOptions(drugID_list)
         checkOptions = checklistOptions(drugID_list)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update, no_update
+        sensOptions = checklistOptionsSensitivity(drugID_list)
+        cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
+        sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update, no_update, sensOptions, cellLineOptions, sensitityOutput
     
     # The drug that will be displayed in a network with it's targets is selected
     elif len(drugID_list) > 0 and selectedDrug != None and comparedDrugs == None:
@@ -274,7 +313,10 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         netOptions = radioItemsOptions(drugID_list)
         checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update, no_update
+        sensOptions = checklistOptionsSensitivity(drugID_list)
+        cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
+        sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update, no_update, sensOptions, cellLineOptions, sensitityOutput
 
     # Drugs are selected to be compared to find shared targets
     elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs != None:
@@ -283,7 +325,10 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         mutual, mutNetElements = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
+        sensOptions = checklistOptionsSensitivity(drugID_list)
+        cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
+        sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements, sensOptions, cellLineOptions, sensitityOutput
 
     # A drug is selected to be displayed in a network with it's targets and drugs are selected to be compared to find shared targets
     else: 
@@ -292,7 +337,10 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         checkOptions = checklistOptions(drugID_list)
         netElements = drugTargetNet(selectedDrug, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
         mutual, mutNetElements = mutualTargets(comparedDrugs, kd_limit = kd, ki_limit = ki, ic50_limit = ic50, Temp = temp, pH = ph)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements
+        sensOptions = checklistOptionsSensitivity(drugID_list)
+        cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
+        sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
+        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements, sensOptions, cellLineOptions, sensitityOutput
 
 def drugList(drugID_list):
     IDlist = []
@@ -318,7 +366,125 @@ def checklistOptions(drugID_list):
     :return: checklist for selection of drugs in shared targets box"""
 
     options = [{'label': x, 'value': x} for x in drugID_list]
+
     return options
+
+def checklistOptionsSensitivity(drugID_list):
+    """Retrieve the selection of drugs that can be choosen to be displayed in a network with it's sensitivity 
+    towards cell lines.
+    :param drugID_list: selected drug IDs
+    :return: checklist for selection of drugs in shared targets box"""
+
+    try:
+        
+        lock.acquire(True)
+
+        cursor.execute("SELECT DISTINCT DrugID FROM Sensitivity")
+        df = pd.DataFrame(cursor.fetchall(), columns=["drugID"])
+
+        drugs = list(set(df["drugID"].values.tolist()).intersection(drugID_list)) # Find drugs with sensitivity data from the selected drugs. 
+
+        options = [{'label': x, 'value': x} for x in drugs]
+        
+        return options
+    
+    finally:
+        lock.release()
+
+def dropdownOptionsSensitivity(selectedSensDrug):
+    """Retrieve the selection of cell lines that can be choosen to be display sensitivity 
+    towards cell lines.
+    :param: selectedSensDrug: selected drug for sensitivty analysis
+    :return: checklist for selection of drugs in shared targets box"""
+
+    try:
+        
+        lock.acquire(True)
+
+        if selectedSensDrug == None: 
+            return ["Select a drug"]
+
+        else: 
+            cursor.execute("SELECT DISTINCT CellLine.Name FROM CellLine INNER JOIN Sensitivity WHERE DrugID = ?", (selectedSensDrug,))
+            df = pd.DataFrame(cursor.fetchall(), columns=["Name"])
+
+            options = df["Name"].values.tolist()
+            
+            return options
+    
+    finally:
+        lock.release()
+
+
+"""def  senOutput(selectedSensDrug, selectedCellLines):
+
+    try:
+        
+        lock.acquire(True)
+
+        if selectedCellLines == None and selectedCellLines == None: 
+
+            return ["Select a cell line to get sensitivity data."]
+        
+        elif selectedCellLines != None and selectedCellLines == None: 
+
+            return ["Select a cell line to get sensitivity data."]
+
+        else: 
+
+            d = []
+            # d = {}
+
+            for i in selectedCellLines:
+                cursor.execute("SELECT CLO FROM CellLine WHERE Name = ?", (i,))
+                df_clo = pd.DataFrame(cursor.fetchall())
+                cursor.execute("SELECT Name, IC50, AUC FROM CellLine INNER JOIN Sensitivity ON (CellLine.CLO = Sensitivity.CLO) WHERE Sensitivity.DrugID = ? and Sensitivity.CLO = ?", (selectedSensDrug, df_clo[0][0],))
+                df = pd.DataFrame(cursor.fetchall(), columns=["Name", "IC50", "AUC"])
+                d.append(f'{df["Name"][0]}')
+                d.append(html.Br())
+                d.append(f'IC\u2085\u2080:   {round(df["IC50"][0], 3)} \u03BCM, AUC:   {round(df["AUC"][0], 3)} \u03BCM')
+                d.append(html.Br())
+
+            return d
+    
+    finally:
+        lock.release()"""
+
+def  senOutput(selectedSensDrug, selectedCellLines):
+
+    try:
+        
+        lock.acquire(True)
+
+        if selectedCellLines == None and selectedCellLines == None: 
+            
+            return ["Select a cell line to get sensitivity data."]
+        
+        elif selectedCellLines != None and selectedCellLines == None: 
+
+            return ["Select a cell line to get sensitivity data."]
+
+        else: 
+
+            d = []
+            # d = {}
+
+            for i in selectedCellLines:
+                cursor.execute("SELECT CLO FROM CellLine WHERE Name = ?", (i,))
+                df_clo = pd.DataFrame(cursor.fetchall())
+                cursor.execute("SELECT DrugName FROM Drug WHERE DrugID = ?", (selectedSensDrug,))
+                df_drug = pd.DataFrame(cursor.fetchall())
+                cursor.execute("SELECT Name, IC50, AUC FROM CellLine INNER JOIN Sensitivity ON (CellLine.CLO = Sensitivity.CLO) WHERE Sensitivity.DrugID = ? and Sensitivity.CLO = ?", (selectedSensDrug, df_clo[0][0],))
+                df = pd.DataFrame(cursor.fetchall(), columns=["Name", "IC50", "AUC"])
+                d.append(html.Br())
+                d.append(f'Drug senitivity data generated for {df_drug[0][0]} screened for {df["Name"][0]}: IC\u2085\u2080   {round(df["IC50"][0], 3)} \u03BCM')
+                d.append(html.Br())
+
+            return d
+    
+    finally:
+        lock.release()
+
 
 def mutualTargets(comparedDrugs, kd_limit = None, ki_limit = None, ic50_limit = None, Temp = None, pH = None):
     """Identifies shared targets between selected drugs
@@ -707,6 +873,8 @@ def targetList(drugID, kd_limit, ki_limit, ic50_limit, pH, temp):
     
     finally:
         lock.release()
+
+
 
 def transform_value(value):
     """Transform a value to get a logarithmic scale
