@@ -893,10 +893,12 @@ def displayTapNodeData(drug, data, kd_limit, ki_limit, ic50_limit, Temp, pH):
             return f'Binding affinity measured between {drug} and {target}: {minValue} nM'
 
 def calculateSem(drug, data, kd, ki, ic50, temp, pH):
+    """Calculate standard error of the mean for the selected drug target pair.
+    :param drug: tapped drug node, data: data belonging to the tapped node, kd_limit: selected kd threshold, ki_limit: selected ki threshold, ic50_limit: selected ic50 threshold, 
+    temp: temperature selected for experimental conditions, ph: pH selected for experimental conditions
+    :return: text representing standard error of the mean for the drug target pair. """
     
     try:
-
-        #create_connection('DrugTargetInteractionDB.db')
         
         lock.acquire(True)
 
@@ -997,8 +999,6 @@ def calculateSem(drug, data, kd, ki, ic50, temp, pH):
             a += ic50Count_df[0][0]
 
         value = sem(values)
-                   
-        #con.close()
 
         return value
 
