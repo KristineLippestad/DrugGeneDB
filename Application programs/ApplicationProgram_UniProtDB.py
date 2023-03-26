@@ -1,10 +1,6 @@
 from aifc import Error
 import sqlite3
-from typing import Type
-from unittest import skip
 import pandas as pd
-import csv
-
 
 #Connect to the database
 def create_connection(db_file):
@@ -27,7 +23,7 @@ def create_connection(db_file):
 
 def insertGeneInputsIntoGene(db_file, uniProt_file, entry, HGNC, proteinName, organism):
     """Write HGNC, UniProtID, name and organism to Gene table from tsv file collected from the UniProt.
-    :param db_file: database db_file, uniProt_file: tsv file from UniProt, entry: volumn name for entry in uniProt_file, HGNC: column name for symbol in uniProt_file, geneName: column name for gene name in uniProt_file, organism: column name for organism in uniProt_file
+    :param db_file: database db_file, uniProt_file: tsv file from UniProt, entry: column name for entry in uniProt_file, HGNC: column name for symbol in uniProt_file, geneName: column name for gene name in uniProt_file, organism: column name for organism in uniProt_file
     :return: database with updated gene table"""
 
     create_connection(db_file)

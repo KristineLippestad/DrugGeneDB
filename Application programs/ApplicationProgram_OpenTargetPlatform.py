@@ -24,9 +24,8 @@ def create_connection(db_file):
 
 #Write diseases to databse
 def insertDiseaseInputsIntoDisease(db_file, OTP_file, diseaseId, diseaseName):
-    """Write diseaseId and diseaseName to Disease table from tsv file collected from the Open Target Platform.
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, diseaseId: column name for disease id in OTP_file, diseaseName: column name for disease name in OTP_file
-    :return: database with updated Disease table"""
+    """Insert values for diseaseId and diseaseName to Disease table from tsv file collected from the Open Target Platform.
+    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, diseaseId: column name for disease id in OTP_file, diseaseName: column name for disease name in OTP_file"""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
@@ -40,9 +39,8 @@ def insertDiseaseInputsIntoDisease(db_file, OTP_file, diseaseId, diseaseName):
 
 #Write drugs to database
 def insertDrugInputsIntoDrug(db_file, OTP_file, drugId, drugName, type):
-    """Write drugId, drugName, and type to drug table from tsv file collected from the Open Target Platform.
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, drugId: column name for drug id in OTP_file, diseaseId: column name for drug name in OTP_file, type: column name for drug type in OTP_file. 
-    :return: database with updated Drug table"""
+    """Insert values for drugId, drugName, and type to drug table from tsv file collected from the Open Target Platform.
+    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, drugId: column name for drug id in OTP_file, drugName: column name for drug name in OTP_file, type: column name for drug type in OTP_file."""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
@@ -55,11 +53,10 @@ def insertDrugInputsIntoDrug(db_file, OTP_file, drugId, drugName, type):
             con.commit()
     con.close()
 
-def insertGeneInputsIntoGene(db_file, OTP_file, HGNC, geneName, gene_file, geneCardsSymbol, entry):
-    """Write GeneCardsSymbol, UniProtID and name to Gene table from tsv file collected from the Open Target Platform.
+'''def insertGeneInputsIntoGene(db_file, OTP_file, HGNC, geneName, gene_file, geneCardsSymbol, entry):
+    """Insert values for GeneCardsSymbol, UniProtID and name to Gene table from tsv file collected from the Open Target Platform.
     :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, HGNC: column name for symbol in OTP_file, geneName: column name for gene name in OTP_file,
-           gene_file: tsv file collected from UniProt ID mapping, geneCardsSymbol: column name for geneCard symbols in gene_file, entry: column name for entry in gene_file. 
-    :return: database with updated gene table"""
+           gene_file: tsv file collected from UniProt ID mapping, geneCardsSymbol: column name for geneCard symbols in gene_file, entry: column name for entry in gene_file."""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
@@ -88,12 +85,12 @@ def uniProt_dict(gene_file, geneCardsSymbol, entry):
             gene_dict[gcSymbol] = uniProtID
 
     return gene_dict
+'''
 
 #Write gene associations to database
 def insertGeneAssociationInputsIntoGeneAssociation(db_file, OTP_file, geneCardSymbol, diseaseId):
-    """Write geneCardsSymbol and diseaseID  to GeneAssociation table from tsv file collected from the Open Target Platform
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, geneCardSymbol: column name for GeneCard symbol in OTP_file, diseaseId: column name for disease ID in OTP_file. 
-    :return: database with updated GeneAsssociation table"""
+    """Insert values for geneCardsSymbol and diseaseID  to GeneAssociation table from tsv file collected from the Open Target Platform
+    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, geneCardSymbol: column name for GeneCard symbol in OTP_file, diseaseId: column name for disease ID in OTP_file."""
 
     create_connection(db_file)
 
@@ -108,9 +105,8 @@ def insertGeneAssociationInputsIntoGeneAssociation(db_file, OTP_file, geneCardSy
 
 #Write interactions to database
 def insertInteractionInputsIntoInteraction(db_file, OTP_file, geneCardSymbol, drugId, mechanismOfAction, actionType):
-    """Write GeneCardsSymbol, drugID, mechanismOfAction, and actionType to Interaction table from tsv file collected from the Open Target Platform.
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, geneCardSymbol: column name for GeneCard symbol in OTP_file, drugId: column name for drug ID in OTP_file, mechanismOfAction: column name for mechanism of action in OTP_file, actionType: column name for action type in OTP_file.
-    :return: database with updated Interaction table"""
+    """Insert values for GeneCardsSymbol, drugID, mechanismOfAction, and actionType to Interaction table from tsv file collected from the Open Target Platform.
+    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, geneCardSymbol: column name for GeneCard symbol in OTP_file, drugId: column name for drug ID in OTP_file, mechanismOfAction: column name for mechanism of action in OTP_file, actionType: column name for action type in OTP_file."""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
@@ -128,9 +124,8 @@ def insertInteractionInputsIntoInteraction(db_file, OTP_file, geneCardSymbol, dr
 
 #Write indicated for to database
 def insertIndicatedForInputsIntoIndicatedFor(db_file, OTP_file, diseaseId, drugId, phase):
-    """Write diseaseID, drugID, and phase to IndicatedFor table from tsv file collected from the Open Target Platform
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, diseaseId: column name for disease ID in OTP_file, drugId: column name for drug ID in OTP_file, phase: column name for phase in OTP_file.
-    :return: database with updated IndicatedFor table"""
+    """Insert values for diseaseID, drugID, and phase to IndicatedFor table from tsv file collected from the Open Target Platform
+    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform, diseaseId: column name for disease ID in OTP_file, drugId: column name for drug ID in OTP_file, phase: column name for phase in OTP_file."""
 
     create_connection(db_file)
     with open(OTP_file, "r") as OTP_file:
@@ -143,8 +138,11 @@ def insertIndicatedForInputsIntoIndicatedFor(db_file, OTP_file, diseaseId, drugI
             cursor.execute("INSERT OR REPLACE INTO IndicatedFor VALUES (?, ?, ?)", (diseaseID, drugID, int(Phase)))
             con.commit()
     con.close()
-
+    
 def insertSingleDrug(db_file, drugId, drugName, type):
+    """Insert values for drugId, drugName, and type to Drug table collected from the litterature.
+        :param db_file: database db_file, drugId: value for ChEMBL id, drugName: value for drug name collected from the litterature, type: value for drug type collected form the litterature."""
+    
     create_connection(db_file)
     cursor.execute("INSERT OR REPLACE INTO Drug VALUES (?, ?, ?, ?, ?)", (drugId, drugName, type, None, None))
     con.commit()

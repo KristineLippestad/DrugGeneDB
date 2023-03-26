@@ -3,7 +3,6 @@ import sqlite3
 from unittest import skip
 import pandas as pd
 
-
 #Connect to the database
 def create_connection(db_file):
     """Create a database connection to the SQLite database given by the db_file
@@ -25,9 +24,8 @@ def create_connection(db_file):
 
 #Write drugs to database
 def insertDrugs(db_file, gdsc_file, drugName):
-    """Write drugID, drug name, and type to drug table from tsv file collected from the Genomics of Drug Sensitivity in Cancer (GDSC).
-    :param db_file: database db_file, gdsc_file: tsv file from GDSC representing the compounds, drugName: columnname for drug name in gdsc file. 
-    :return: database with updated drug table"""
+    """Insert values for drugID, drug name, and type to drug table from tsv file collected from the Genomics of Drug Sensitivity in Cancer (GDSC).
+    :param db_file: database db_file, gdsc_file: tsv file from GDSC representing the compounds, drugName: columnname for drug name in gdsc file."""
     
     a = 0
 
@@ -91,60 +89,10 @@ enzyme_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_enzyme.ts
 oligosaccharide_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_oligosaccharide.tsv", "Parent Molecule", "Synonyms")
 gene_dict = chemblID_dict("/Users/kristinelippestad/Downloads/chembl_gene.tsv", "Parent Molecule", "Synonyms")
 
-
-def insertGeneInputsIntoGene(db_file, gdsc_file, target, geneName):
-    """Write GeneCardsSymbol, and geneName to Gene table from tsv file collected from the Open Target Platform
-    :param db_file: database db_file, OTP_file: tsv file from Open Target Platform
-    :return: database with updated gene table"""
-
-    create_connection(db_file)
-    with open(gdsc_file, "r") as gdsc_file:
-        df = pd.read_csv(gdsc_file, delimiter="\t")
-        for ind in df.index:
-            targets = df[target][ind]
-            target_list = targets.split(", ")
-            for t in target_list:
-                symbol = t #fikse dette
-                uniprotID = None 
-                name = df[name][ind] #Fikse dette
-                cursor.execute("INSERT OR REPLACE INTO Gene VALUES (?, ?, ?)", (symbol, uniprotID, name))
-                con.commit()
-    con.close()
-
-def targetList(gdsc_file, path, target):
-    target_list = []
-    with open(gdsc_file, "r") as gdsc_file:
-        df = pd.read_csv(gdsc_file, delimiter="\t")
-        for ind in df.index:
-            t = str(df[target][ind])
-            substring = ", "
-            if substring in t:
-                targets = t.split(", ")
-                t_add = list(set(target_list) - set(targets))
-                if t_add != "": 
-                    target_list.extend(t_add)
-            else:
-                if t not in target_list: 
-                    target_list.append(t)
-    
-    with open(path, "w") as f:
-        for item in set(target_list):
-            #write each item to new line
-            f.write("%s\n" % item)
-        f.close()
-    
-    return(set(target_list))
-
-    # write this list to a text file where the elements are separated with blankspaces that can be uploaded in uniprot
-
-targetList("/Users/kristinelippestad/Downloads/gdsc_druglist.tsv", "/Users/kristinelippestad/Dokumenter/Master/targets.txt", " Targets")
-
-
 def insertCellLines(db_file, gdsc_file, clo_file, name, tissue, tissueSubType, cloId, cloName, tcga):
-    """Write CLO, cell line name, tissue type, tissue sub-type and diseaseID to CellLine table.
-    :param db_file: database db_file, gdsc_file: tsv file collected from the Genomics of Drug Sensitivity in Cancer (GDSC) representing the cell lines, clo_file: Cell Line Ontology (CLO) csv file downloaded from https://bioportal.bioontology.org/ontologies/CLO, 
-                    name: column name for cell line name in gdsc_file, tissue: column name for tissue in gdsc_file, tissueSubType: column name for tissue subtype in gdsc_file, cloId: column name for CLO id, cloName: column name for cell line name in clo file, tcga: column name tcga classification in gdsc file. 
-    :return: database with updated cellLine table"""
+    """Insert values for CLO, cell line name, tissue type, tissue sub-type and diseaseID to CellLine table.
+    :param: db_file: database db_file, gdsc_file: tsv file collected from the Genomics of Drug Sensitivity in Cancer (GDSC) representing the cell lines, clo_file: Cell Line Ontology (CLO) csv file downloaded from https://bioportal.bioontology.org/ontologies/CLO, 
+                    name: column name for cell line name in gdsc_file, tissue: column name for tissue in gdsc_file, tissueSubType: column name for tissue subtype in gdsc_file, cloId: column name for CLO id, cloName: column name for cell line name in clo file, tcga: column name tcga classification in gdsc file."""
     create_connection(db_file)
     with open(gdsc_file, "r") as gdscFile:
         df = pd.read_csv(gdscFile, delimiter="\t")
@@ -158,9 +106,9 @@ def insertCellLines(db_file, gdsc_file, clo_file, name, tissue, tissueSubType, c
             diseaseID = dis_dict.get((df[tcga][ind]), None)
             if clo.find("', '"):
                 clo_list = clo.split("', '")
-                for i in clo_list:
+                for i in clo_list: # When multiple cell line ontologies are used for one cell line.
                     cursor.execute("INSERT OR REPLACE INTO CellLine VALUES (?, ?, ?, ?, ?)", (i, cellLineName, tissueSubtypeName, tissueName, diseaseID))
-            elif clo == "": # Check this again
+            elif clo == "": 
                 s = " ".join(["Type in the correct clo for ", cellLineName, " (on the formate: CLO_0001199): "])
                 id = input(s)
                 if id == "":
@@ -189,6 +137,9 @@ def cloDict(clo_file, cloId, name):
     return clo_dict
 
 def disease_dict(gdsc_file, TCGA):
+    """Write a dictionary with TGCA symbol as key and EFO ontology identifier as value.
+    :param: db_file: database db_file, gdsc_file: tsv file collected from the Genomics of Drug Sensitivity in Cancer (GDSC) representing the cell lines, tcga: column name tcga classification in gdsc file.
+    :return: dictionary with TCGA symbol as key and EFO ontology identifier as value"""
     tcga_list = []
     disease_dict = {}
     with open(gdsc_file, "r") as gdsc_f:
@@ -244,16 +195,16 @@ def disease_dict(gdsc_file, TCGA):
     return disease_dict
 
 def insertSensitivity(db_file, gdsc_dataset, clo_file, drug_file, cloId, cloName, drugId, Synonyms, cl_name, drugName, ic50, AUC, dataset):
-    """Write CLO, drug ID, IC50, AUC, and source into Sensitivity table.
+    """Insert values for CLO, drug ID, IC50, AUC, and source into Sensitivity table.
     :param db_file: database db_file, gdsc_file: tsv file collected from the Genomics of Drug Sensitivity in Cancer (GDSC) representing the cell lines, clo_file: Cell Line Ontology (CLO) csv file downloaded from https://bioportal.bioontology.org/ontologies/CLO, drug_file: tsv file from ChEMBL representing the compounds, retrieved from https://www.ebi.ac.uk/chembl/g/#browse/compounds, 
-                    cloId: column name for CLO id, cloName: column name for cell line name in clo file, drugId: column name for drug ID in drug file, Synonyms: column name for synonyms in drug file, cl_name: column name for cell line in gdsc_dataset, drugName: column name for drug name in gdsc_dataset, ic50: column name for IC50 in gdsc_dataset, AUC: column name for AUC in gdsc_dataset, dataset: column name for datasets in gdsc_dataset.
-    :return: database with updated Sensitivity table"""
+                    cloId: column name for CLO id, cloName: column name for cell line name in clo file, drugId: column name for drug ID in drug file, Synonyms: column name for synonyms in drug file, cl_name: column name for cell line in gdsc_dataset, drugName: column name for drug name in gdsc_dataset, ic50: column name for IC50 in gdsc_dataset, AUC: column name for AUC in gdsc_dataset, dataset: column name for datasets in gdsc_dataset."""
     
     create_connection(db_file)
     
     with open(gdsc_dataset, "r") as gdsc_dataset:
         df = pd.read_csv(gdsc_dataset, delimiter=",")
         clo_dict = cloDict(clo_file, cloId, cloName)
+        print(clo_dict)
         drugID_dict = chemblID_dict(drug_file, drugId, Synonyms)
         for ind in df.index:
             cellLineName = df[cl_name][ind]
@@ -265,17 +216,17 @@ def insertSensitivity(db_file, gdsc_dataset, clo_file, drug_file, cloId, cloName
             source = df[dataset][ind]
             if clo != "" and drugID != "": 
                 substring = "', '"
-                if substring in clo:
+                if substring in clo: # When multiple cell line ontologies are used for one cell line.
                     clo_list = clo.split("', '")
                     for i in clo_list:
                         cursor.execute("INSERT OR REPLACE INTO Sensitivity VALUES (?, ?, ?, ?, ?)", (i, drugID, ic, auc, source))
-                else: 
+                else:
                     cursor.execute("INSERT OR REPLACE INTO Sensitivity VALUES (?, ?, ?, ?, ?)", (clo, drugID, ic, auc, source))
             else:
                 continue
             con.commit()
     con.close()
 
-insertDrugs("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/gdsc_druglist.tsv", " Name")
-insertCellLines("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/gdsc_cellLines.tsv", "/Users/kristinelippestad/Downloads/CLO.csv", "Cell line Name", " Tissue", "Tissue sub-type", "Class ID", "Synonyms", " TCGA Classfication")
-insertSensitivity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/GDSC2_fitted_dose_response.csv", "/Users/kristinelippestad/Downloads/CLO.csv", "/Users/kristinelippestad/Downloads/chembl_drug.tsv", "Class ID", "Synonyms", "Parent Molecule", "Synonyms", "CELL_LINE_NAME", "DRUG_NAME", "LN_IC50", "AUC", "DATASET")
+#insertDrugs("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/gdsc_druglist.tsv", " Name")
+#insertCellLines("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/gdsc_cellLines.tsv", "/Users/kristinelippestad/Downloads/CLO.csv", "Cell line Name", " Tissue", "Tissue sub-type", "Class ID", "Synonyms", " TCGA Classfication")
+#insertSensitivity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Downloads/GDSC2_fitted_dose_response.csv", "/Users/kristinelippestad/Downloads/CLO.csv", "/Users/kristinelippestad/Downloads/chembl_drug.tsv", "Class ID", "Synonyms", "Parent Molecule", "Synonyms", "CELL_LINE_NAME", "DRUG_NAME", "LN_IC50", "AUC", "DATASET")

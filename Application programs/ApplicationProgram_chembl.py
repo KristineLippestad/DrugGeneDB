@@ -21,10 +21,9 @@ def create_connection(db_file):
     return con
 
 def insertDataToDrug(db_file, chembl_file, drugId, smiles, inChiKey):
-    """Write smile and InChi Key to drug table from tsv file collected from ChEMBL.
+    """Insert values for Smiles and InChi Key to drug table from tsv file collected from ChEMBL.
     :param db_file: database db_file, chembl_file: tsv file from ChEMBL, drugId: column name for drug id in ChEMBL, smiles: column name for smiles in ChEMBL_file, 
-    inChiKey: column name for smiles in ChEMBL_file, 
-    :return: database with updated Drug table"""
+    inChiKey: column name for smiles in ChEMBL_file"""
 
     create_connection(db_file)
     with open(chembl_file, "r") as chembl_file:
