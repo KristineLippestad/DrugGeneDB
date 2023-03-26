@@ -404,7 +404,7 @@ def dropdownOptionsSensitivity(selectedSensDrug):
             return ["Select a drug"]
 
         else: 
-            cursor.execute("SELECT DISTINCT CellLine.Name FROM CellLine INNER JOIN Sensitivity WHERE DrugID = ?", (selectedSensDrug,))
+            cursor.execute("SELECT DISTINCT CellLine.Name FROM CellLine INNER JOIN Sensitivity ON CellLine.CLO = Sensitivity.CLO WHERE DrugID = ?", (selectedSensDrug,))
             df = pd.DataFrame(cursor.fetchall(), columns=["Name"])
 
             options = df["Name"].values.tolist()
@@ -423,18 +423,17 @@ def  senOutput(selectedSensDrug, selectedCellLines):
         
         lock.acquire(True)
 
-        if selectedCellLines == None and selectedCellLines == None: 
+        if selectedSensDrug == None and selectedCellLines == None: 
             
-            return ["Select a cell line to get sensitivity data."]
+            return ["Select a drug and a cell line to get sensitivity data."]
         
-        elif selectedCellLines != None and selectedCellLines == None: 
+        elif selectedSensDrug != None and selectedCellLines == None: 
 
             return ["Select a cell line to get sensitivity data."]
 
         else: 
 
             d = []
-            # d = {}
 
             for i in selectedCellLines:
                 cursor.execute("SELECT CLO FROM CellLine WHERE Name = ?", (i,))
@@ -444,7 +443,7 @@ def  senOutput(selectedSensDrug, selectedCellLines):
                 cursor.execute("SELECT Name, IC50, AUC FROM CellLine INNER JOIN Sensitivity ON (CellLine.CLO = Sensitivity.CLO) WHERE Sensitivity.DrugID = ? and Sensitivity.CLO = ?", (selectedSensDrug, df_clo[0][0],))
                 df = pd.DataFrame(cursor.fetchall(), columns=["Name", "IC50", "AUC"])
                 d.append(html.Br())
-                d.append(f'Drug senitivity data generated for {df_drug[0][0]} screened for {df["Name"][0]}: IC\u2085\u2080   {round(df["IC50"][0], 3)} \u03BCM')
+                d.append(f'Drug senitivity data generated for {df_drug[0][0]} screened for {df["Name"][0]}: IC\u2085\u2080 = {round(df["IC50"][0], 3)} \u03BCM')
                 d.append(html.Br())
 
             return d
@@ -770,7 +769,6 @@ def minMaxValues(selectedDrug, target, kd_limit, ki_limit, ic50_limit, temp, pH)
     finally:
         lock.release()
 
-
 def targetProfileBA(id_list, kd_limit = None, ki_limit = None, ic50_limit = None, Temp = None, pH = None):
     """Retrieve target profiles for a list of drugs with measured binding affinities below set limits and write them to a drug panel file. 
     :param id_list: selected drugs, kd_limit: selected kd threshold, ki_limit: selected ki threshold, ic50_limit: selected ic50 threshold, 
@@ -1005,8 +1003,6 @@ def calculateSem(drug, data, kd, ki, ic50, temp, pH):
     finally:
         lock.release()
 
-        
-
 @app.callback(
     Output("download-text", "data"),
     Output("btn_drugpanel", "n_clicks"),
@@ -1032,6 +1028,3 @@ if __name__ == '__main__':
 
 
 con.close()
-
-
-
