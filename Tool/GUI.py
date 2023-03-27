@@ -7,6 +7,7 @@ import sqlite3
 import threading
 from aifc import Error
 from scipy.stats import sem
+import math
 
 #Connect to the database
 def create_connection(db_file):
@@ -72,7 +73,9 @@ default_stylesheet = [
 ]
 
 # Select options for selected drug IDs 
-create_connection('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db')
+
+create_connection('/Users/kristinelippestad/Downloads/DrugTargetInteractionDBTest.db')
+
 drug_df = pd.read_sql_query("SELECT DISTINCT Drug.DrugID, DrugName From Drug INNER JOIN MeasuredFor ON Drug.DrugID = MeasuredFor.DrugID", con) # Only drugIDs with associated binding affinity values are included.
 drugList = []
 for ind in drug_df.index: 
@@ -80,14 +83,15 @@ for ind in drug_df.index:
     drugList.append(d)
 con.close()
 
-create_connection('/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db')
+create_connection('/Users/kristinelippestad/Downloads/DrugTargetInteractionDBTest.db')
+
 
 #drug_df = pd.DataFrame(drug_query, columns = ['DrugID'])
 
 app.layout = html.Div([
     html.Div(children=[
     html.H1( 
-        children='Drug Target Profile Generated from Binding Affinity Values',
+        children='Drug Target Profiles Generated from Binding Affinity Values',
         style={
             'textAlign': 'center',
             'color': colors['text'],
@@ -440,7 +444,7 @@ def  senOutput(selectedSensDrug, selectedCellLines):
                 cursor.execute("SELECT Name, IC50, AUC FROM CellLine INNER JOIN Sensitivity ON (CellLine.CLO = Sensitivity.CLO) WHERE Sensitivity.DrugID = ? and Sensitivity.CLO = ?", (selectedSensDrug, df_clo[0][0],))
                 df = pd.DataFrame(cursor.fetchall(), columns=["Name", "IC50", "AUC"])
                 d.append(html.Br())
-                d.append(f'Drug senitivity data generated for {df_drug[0][0]} screened for {df["Name"][0]}: IC\u2085\u2080 = {round(df["IC50"][0], 3)} \u03BCM')
+                d.append(f'Drug senitivity data generated for {df_drug[0][0]} screened for {df["Name"][0]}: IC\u2085\u2080 = {round(math.exp(df["IC50"][0]), 3)} \u03BCM')
                 d.append(html.Br())
 
             return d
@@ -602,8 +606,6 @@ def minMaxValues(selectedDrug, target, kd_limit, ki_limit, ic50_limit, temp, pH)
 
     # The min and max value is determined by the set thresholds (only measurements below the set threshold are considered)
     # This influence the colourcode
-
-    # add mode (typetall) https://www.geeksforgeeks.org/find-mean-mode-sql-server/
 
     try:
 
@@ -882,7 +884,7 @@ def displayTapNodeData(drug, data, kd_limit, ki_limit, ic50_limit, Temp, pH):
 
             sem_value = round(calculateSem(drug, data, kd, ki, ic50, Temp, pH),3)
 
-            return f'Binding affinity measured between {drug} and {target}: {minValue} nM to {maxValue} nM. Standard error of the mean is calculated to {sem_value}.'
+            return f'Binding affinity measured between {drug} and {target}: {minValue} nM to {maxValue} nM. Standard error of the mean is calculated to \u00B1 {sem_value} nM.'
 
         else:
             return f'Binding affinity measured between {drug} and {target}: {minValue} nM'
