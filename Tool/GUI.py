@@ -8,9 +8,6 @@ import threading
 from aifc import Error
 from scipy.stats import sem
 
-# https://towardsdatascience.com/dashing-through-christmas-songs-using-dash-and-sql-34ef2eb4d0cb
-# https://plotly.com/python/
-
 #Connect to the database
 def create_connection(db_file):
     """Create a database connection to the SQLite database given by the db_file

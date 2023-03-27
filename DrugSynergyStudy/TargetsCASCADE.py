@@ -1,5 +1,4 @@
 import pandas as pd
-import csv
 
 cas1_dict = pd.read_excel('/Users/kristinelippestad/Dokumenter/Master/CompleteProfile/pcbi.1004426.s005.xlsx').set_index('Node')['HGNC symbols'].to_dict()
 del cas1_dict["Antisurvival"]
@@ -53,7 +52,6 @@ def targetProfileFromFile(drugPanelFile, HGNCtoNodeDict, fileName):
                 drugPanel(fileName, drug, targetProfile)
 
 def drugPanel(fileName, drug, targets):
-    #print(f'targets: {targets}')
     with open(fileName, 'a+') as f:
         f.seek(0)
         first_line = f.readline().rstrip('\n')
@@ -65,13 +63,6 @@ def drugPanel(fileName, drug, targets):
             print(f'No interactions with binding affinity measured below the given limit for {drug}.')
     f.close()
 
-def targetProfile(drugPanel, HGNCtoNodeDict):
-    l = drugPanel.split(" inhibits ")
-    drug = l[0]
-    targets = l[1].split(", ")
-    targetProfile= set([key for ele in targets for key, val in cas1_dict.items() if ele in val])
-
-    print(f'{drug}: {targetProfile}')
 
 def percentage(part, whole):
     return 100 * part/whole
