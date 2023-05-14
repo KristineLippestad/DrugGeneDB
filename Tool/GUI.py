@@ -112,7 +112,7 @@ app.layout = html.Div([
 
     # Settings for binding affinitiy thresholds
     html.Div([
-        html.H3('Binding Affinity Thresholds'),
+        html.H3('Binding Affinity Cut-Offs'),
         html.Label(['K', html.Sub('d'), ' slider']),
         dcc.Slider(
             0,
@@ -157,7 +157,7 @@ app.layout = html.Div([
 
     # Settings for experimental conditions
     html.Div([
-        html.H3('Experimental conditions'),
+        html.H3('Experimental Conditions'),
 
         'Temperature: ',
         dcc.Input(id='temp-input', type='number'),
@@ -294,8 +294,12 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
     drugID_list = drugList(drug_list)
 
     # No drugs are selected
-    if str(type(drug_list)) == "<class 'NoneType'>":
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
+    if str(type(drug_list)) == "<class 'NoneType'>" or drug_list == []:
+        netOptions = radioItemsOptions(drugID_list)
+        checkOptions = checklistOptions(drugID_list)
+        sensOptions = checklistOptionsSensitivity(drugID_list)
+        
+        return 'Cut-off selected for Kd: {} nM'.format(kd), 'Cut-off selected for Ki: {} nM'.format(ki), u'Cut-off selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, no_update, no_update, no_update, checkOptions, no_update, no_update, sensOptions, no_update, no_update
     
     # Drugs are selected
     elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs == None:
@@ -305,7 +309,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         sensOptions = checklistOptionsSensitivity(drugID_list)
         cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
         sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update, no_update, sensOptions, cellLineOptions, sensitityOutput
+        return 'Cut-off selected for Kd: {} nM'.format(kd), 'Cut-off selected for Ki: {} nM'.format(ki), u'Cut-off selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, no_update, dpText, checkOptions, no_update, no_update, sensOptions, cellLineOptions, sensitityOutput
     
     # The drug that will be displayed in a network with it's targets is selected
     elif len(drugID_list) > 0 and selectedDrug != None and comparedDrugs == None:
@@ -316,7 +320,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         sensOptions = checklistOptionsSensitivity(drugID_list)
         cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
         sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update, no_update, sensOptions, cellLineOptions, sensitityOutput
+        return 'Cut-off selected for Kd: {} nM'.format(kd), 'Cut-off selected for Ki: {} nM'.format(ki), u'Cut-off selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, no_update, no_update, sensOptions, cellLineOptions, sensitityOutput
 
     # Drugs are selected to be compared to find shared targets
     elif len(drugID_list) > 0 and selectedDrug == None and comparedDrugs != None:
@@ -328,7 +332,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         sensOptions = checklistOptionsSensitivity(drugID_list)
         cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
         sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements, sensOptions, cellLineOptions, sensitityOutput
+        return 'Cut-off selected for Kd: {} nM'.format(kd), 'Cut-off selected for Ki: {} nM'.format(ki), u'Cut-off selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements, sensOptions, cellLineOptions, sensitityOutput
 
     # A drug is selected to be displayed in a network with it's targets and drugs are selected to be compared to find shared targets
     else: 
@@ -340,7 +344,7 @@ def update_figure(drug_list, kd_value, ki_value, ic50_value, temp, ph, selectedD
         sensOptions = checklistOptionsSensitivity(drugID_list)
         cellLineOptions = dropdownOptionsSensitivity(selectedSensDrug)
         sensitityOutput = senOutput(selectedSensDrug, selectedCellLines)
-        return 'Threshold selected for Kd: {} nM'.format(kd), 'Threshold selected for Ki: {} nM'.format(ki), u'Threshold selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements, sensOptions, cellLineOptions, sensitityOutput
+        return 'Cut-off selected for Kd: {} nM'.format(kd), 'Cut-off selected for Ki: {} nM'.format(ki), u'Cut-off selected for IC\u2085\u2080: {} nM'.format(ic50), netOptions, dp, netElements, dpText, checkOptions, mutual, mutNetElements, sensOptions, cellLineOptions, sensitityOutput
 
 def drugList(drugID_list):
     IDlist = []
