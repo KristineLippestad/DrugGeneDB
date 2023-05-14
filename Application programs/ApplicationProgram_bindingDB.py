@@ -111,92 +111,6 @@ def insertBindingAffinity(db_file, binding_dataset, drugId, smiles, inChiKey, up
         con.commit()
     con.close()
 
-# Functionality implemented in the function above. 
-"""def insertByInChIBindingAffinity(db_file, binding_dataset, InChi, drugId, upId, Kd, Ki, IC50, pH, Temperature, Organism, Source):
-
-    create_connection(db_file)
-    cursor.execute("SELECT UniProtID, HGNC FROM Gene;")
-    gene_dict = {}
-    dtp_dict = {}
-    for (UniProtID, HGNC) in cursor:
-        gene_dict[UniProtID] = HGNC
-
-    with open(binding_dataset, "r") as binding_dataset:
-        df = pd.read_csv(binding_dataset, delimiter="\t", error_bad_lines=False)
-        
-        for ind in df.index:
-            inChi = df["Ligand InChI"][ind]
-            if str(inChi) == InChi: 
-                dID = drugId
-                UniProtID = df[upId][ind]
-                hgnc = gene_dict.get(UniProtID)
-                kd = str(df[Kd][ind])
-                if kd == "nan":
-                    kd = None
-                    kd_min = kd
-                    kd_max = kd
-                elif "<" in kd:
-                    kd_min = 0
-                    kd_max = kd[1:]
-                elif ">" in kd:
-                    kd_min = kd[1:]
-                    kd_max = float('inf')
-                else:
-                    kd_min = kd
-                    kd_max = kd
-                ki = str(df[Ki][ind])
-                if ki == "nan":
-                    ki = None
-                    ki_min = ki
-                    ki_max = ki
-                elif "<" in ki:
-                    ki_min = 0
-                    ki_max = ki[1:]
-                elif ">" in ki:
-                    ki_min = ki[1:]
-                    ki_max = float('inf')
-                else:
-                    ki_min = ki
-                    ki_max = ki
-                ic50 = str(df[IC50][ind])
-                if ic50 == "nan":
-                    ic50 = None
-                    ic50_min = ic50
-                    ic50_max = ic50
-                elif "<" in ic50:
-                    ic50_min = 0
-                    ic50_max = ic50[1:]
-                elif ">" in ic50:
-                    ic50_min = ic50[1:]
-                    ic50_max = float('inf')
-                else:
-                    ic50_min = ic50
-                    ic50_max = ic50
-                ph = df[pH][ind]
-                temp = str(df[Temperature][ind]).replace(" C", "")
-                temp = float(temp)
-                org = df[Organism][ind]
-                source = df[Source][ind]
-                cursor.execute("SELECT * FROM Drug WHERE DrugID = ?", (dID, ))
-                row = cursor.fetchone()
-                cursor.execute("SELECT * FROM Gene WHERE HGNC = ?", (hgnc, ))
-                r = cursor.fetchone()
-
-                if (row != None and r != None) and (kd != None or ki != None or ic50 != None):
-                    dtp = hgnc + "_" + dID
-                    if dtp in dtp_dict.keys():
-                        a = dtp_dict.get(dtp)
-                        dtp_dict[dtp] = a + 1
-                        bindingReactionID = hgnc + "_" + dID + "_" + str(a + 1)
-                        cursor.execute("INSERT OR REPLACE INTO MeasuredFor VALUES (?, ?, ?)", (hgnc, dID, bindingReactionID))
-                        cursor.execute("INSERT OR REPLACE INTO BindingAffinity VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (bindingReactionID, kd_min, kd_max, ki_min, ki_max, ic50_min, ic50_max, ph, temp, org, source))
-                    else:  
-                        dtp_dict[dtp] = 1
-                        bindingReactionID = hgnc + "_" + dID + "_1" 
-                        cursor.execute("INSERT OR REPLACE INTO MeasuredFor VALUES (?, ?, ?)", (hgnc, dID, bindingReactionID))
-                        cursor.execute("INSERT OR REPLACE INTO BindingAffinity VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (bindingReactionID, kd_min, kd_max, ki_min, ki_max, ic50_min, ic50_max, ph, temp, org, source))
-        con.commit()
-    con.close()"""
 
 
 def insertSingleBindingAffinity(db_file, drugID, hgnc, Source, Kd_min = None, Kd_max = None, Ki_min = None, Ki_max = None, ic50_min = None, ic50_max = None, pH = None, temp = None, Organism = None):
@@ -238,7 +152,7 @@ def insertSingleBindingAffinity(db_file, drugID, hgnc, Source, Kd_min = None, Kd
 
     con.close()
 
-insertBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/BindingDB_All_02.02.2023.tsv", "ChEMBL ID of Ligand", "Ligand SMILES", "Ligand InChI Key", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
+#insertBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/BindingDB_All_02.02.2023.tsv", "ChEMBL ID of Ligand", "Ligand SMILES", "Ligand InChI Key", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
 
 """
 insertByInChIBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/BindingDB_All_02.02.2023.tsv", "InChI=1S/C7H7N5O2/c1-11-6(13)4-5(10-7(11)14)12(2)9-3-8-4/h3H,1-2H3", "CHEMBL578512", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
@@ -253,6 +167,7 @@ insertByInChIBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTar
 insertByInChIBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/BindingDB_All_02.02.2023.tsv", "InChI=1S/C13H18Cl2N2O2/c14-5-7-17(8-6-15)11-3-1-10(2-4-11)9-12(16)13(18)19/h1-4,12H,5-9,16H2,(H,18,19)/t12-/m0/s1", "CHEMBL852", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
 insertByInChIBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/BindingDB_All_02.02.2023.tsv", "InChI=1S/C24H23FN4O3/c25-20-8-5-15(14-21-17-3-1-2-4-18(17)22(30)27-26-21)13-19(20)24(32)29-11-9-28(10-12-29)23(31)16-6-7-16/h1-5,8,13,16H,6-7,9-12,14H2,(H,27,30)", "CHEMBL521686", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
 insertByInChIBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "/Users/kristinelippestad/Dokumenter/Master/BindingDB_All_02.02.2023.tsv", "InChI=1S/C23H18ClF2N3O3S/c1-2-9-33(31,32)29-19-8-7-18(25)20(21(19)26)22(30)17-12-28-23-16(17)10-14(11-27-23)13-3-5-15(24)6-4-13/h3-8,10-12,29H,2,9H2,1H3,(H,27,28)", "CHEMBL1229517", "UniProt (SwissProt) Primary ID of Target Chain", "Kd (nM)",  "Ki (nM)", "IC50 (nM)", "pH", "Temp (C)", "Target Source Organism According to Curator or DataSource", "Curation/DataSource")
+"""
 """
 insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "BRAF", "doi:10.1038/nbt1358", Kd_min = 2900, Kd_max = 2900,  temp = 25, Organism = "Homo sapiens")
 insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL573339", "CLK1", "doi:10.1038/nbt1358", Kd_min = 3900, Kd_max = 3900,  temp = 25, Organism = "Homo sapiens")
@@ -269,3 +184,4 @@ insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTarg
 insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "MYC", "doi.org/10.1016/j.chembiol.2008.09.011", Kd_min = 4600, Kd_max = 6400, temp = 25, Organism = "Homo sapiens")
 insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "MYC", "doi.org/10.1371/journal.pone.0097285", Kd_min = 31600, Kd_max = 47800, temp = 25, Organism = "Homo sapiens")
 insertSingleBindingAffinity("/Users/kristinelippestad/Dokumenter/Master/DrugTargetInteractionDB.db", "CHEMBL1568415", "MYCN", "doi.org/10.1371/journal.pone.0097285", Kd_min = 31300, Kd_max = 52500, temp = 25, Organism = "Homo sapiens")
+"""
