@@ -6,7 +6,7 @@ del cas1_dict["Prosurvival"]
 
 #Create a list with all HGNC symbols for each node
 for k, v in cas1_dict.items():
-    if isinstance(v, str): 
+    if isinstance(v, str):
         val = v.split(", ")
         cas1_dict.update({k: val})
 
